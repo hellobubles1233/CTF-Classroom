@@ -108,6 +108,9 @@ const server = http.createServer(async (req, res) => {
       return json(res, 200, { ok: true, session });
     } catch (error) {
       const errorMessage = error && error.message ? error.message : "fetch failed";
+      const hintMessage = /route not found \(404\)/i.test(errorMessage)
+        ? "Central API routes are missing on this Convex deployment. Run `npm run convex:deploy` for the central backend, then click Join / Rejoin again."
+        : "Central registration unavailable. Joined locally; retry Join/Rejoin later to sync.";
       const session = {
         studentId: null,
         name,
@@ -120,7 +123,7 @@ const server = http.createServer(async (req, res) => {
         ok: false,
         offline: true,
         session,
-        message: "Central registration unavailable. Joined locally; retry Join/Rejoin later to sync.",
+        message: hintMessage,
         error: errorMessage
       });
     }

@@ -1,5 +1,6 @@
 const fs = require("fs");
 const path = require("path");
+const { convexToJson, jsonToConvex } = require("convex/values");
 
 const ROOT = path.resolve(__dirname, "..", "..");
 const SESSION_FILE = path.join(ROOT, ".ctf", "runtime", "session.json");
@@ -46,16 +47,20 @@ function getCourseKey() {
   return envRequired("CTF_COURSE_KEY");
 }
 
-async function postJSON(pathname, payload) {
-  let lastNetworkError = null;
+async function callConvexMutation(pathName, argsObject) {
+  let lastError = null;
 
   for (const baseUrl of candidateBaseUrls()) {
-    const url = `${baseUrl}${pathname}`;
+    const url = `${baseUrl}/api/mutation`;
     try {
       const response = await fetch(url, {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify(payload)
+        body: JSON.stringify({
+          path: pathName,
+          format: "convex_encoded_json",
+          args: [convexToJson(argsObject)]
+        })
       });
 
       const text = await response.text();
@@ -67,17 +72,83 @@ async function postJSON(pathname, payload) {
       }
 
       if (!response.ok) {
-        throw new Error(`Central API ${pathname} failed (${response.status}): ${JSON.stringify(data)}`);
+        lastError = new Error(`Convex mutation ${pathName} failed (${response.status}): ${JSON.stringify(data)}`);
+        continue;
       }
 
-      return data;
-    } catch (error) {
-      // Stop on HTTP-level errors from the API, but retry on network-level failures.
-      if (error && /Central API/.test(String(error.message || ""))) {
-        throw error;
+      if (data.status === "success") {
+        return jsonToConvex(data.value);
       }
-      lastNetworkError = error;
+
+      if (data.status === "error") {
+        throw new Error(data.errorMessage || `Convex mutation ${pathName} returned error.`);
+      }
+
+      throw new Error(`Convex mutation ${pathName} invalid response: ${JSON.stringify(data)}`);
+    } catch (error) {
+      lastError = error;
     }
+  }
+
+  throw new Error(
+    `Convex mutation ${pathName} unreachable: ${lastError && lastError.message ? lastError.message : String(lastError)}`
+  );
+}
+
+function candidatePathnames(pathname) {
+  const p = pathname.startsWith("/") ? pathname : `/${pathname}`;
+  const paths = [p];
+  if (!p.startsWith("/api/")) {
+    paths.push(`/api${p}`);
+  }
+  return [...new Set(paths)];
+}
+
+async function postJSON(pathname, payload) {
+  let lastNetworkError = null;
+  const notFoundUrls = [];
+
+  for (const baseUrl of candidateBaseUrls()) {
+    for (const apiPath of candidatePathnames(pathname)) {
+      const url = `${baseUrl}${apiPath}`;
+      try {
+        const response = await fetch(url, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        const text = await response.text();
+        let data;
+        try {
+          data = text ? JSON.parse(text) : {};
+        } catch {
+          data = { raw: text };
+        }
+
+        if (response.status === 404) {
+          notFoundUrls.push(url);
+          continue;
+        }
+
+        if (!response.ok) {
+          throw new Error(`Central API ${apiPath} failed (${response.status}): ${JSON.stringify(data)}`);
+        }
+
+        return data;
+      } catch (error) {
+        // Stop on HTTP-level errors from the API, but retry on network-level failures.
+        if (error && /Central API/.test(String(error.message || ""))) {
+          throw error;
+        }
+        lastNetworkError = error;
+      }
+    }
+  }
+
+  if (notFoundUrls.length) {
+    const tried = [...new Set(notFoundUrls)].slice(0, 6).join(", ");
+    throw new Error(`Central API route not found (404). Tried: ${tried}`);
   }
 
   const details = lastNetworkError && lastNetworkError.cause
@@ -88,21 +159,41 @@ async function postJSON(pathname, payload) {
 
 async function registerOrRejoin(name) {
   const codespaceName = process.env.CODESPACE_NAME || process.env.HOSTNAME || undefined;
-  return postJSON("/register", {
+  const payload = {
     courseKey: getCourseKey(),
     name,
     codespaceName
-  });
+  };
+
+  try {
+    return await postJSON("/register", payload);
+  } catch (error) {
+    const message = String(error && error.message ? error.message : error);
+    if (/route not found \(404\)|failed \(404\)/i.test(message)) {
+      return callConvexMutation("ctf:registerOrRejoin", payload);
+    }
+    throw error;
+  }
 }
 
 async function reportSuccess(session, challengeId, points, source) {
-  return postJSON("/report-success", {
+  const payload = {
     courseKey: getCourseKey(),
     studentId: session.studentId,
     challengeId,
     points,
     source
-  });
+  };
+
+  try {
+    return await postJSON("/report-success", payload);
+  } catch (error) {
+    const message = String(error && error.message ? error.message : error);
+    if (/route not found \(404\)|failed \(404\)/i.test(message)) {
+      return callConvexMutation("ctf:reportSuccess", payload);
+    }
+    throw error;
+  }
 }
 
 function saveSession(session) {

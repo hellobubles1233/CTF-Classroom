@@ -44,7 +44,29 @@ http.route({
 });
 
 http.route({
+  path: "/api/register",
+  method: "POST",
+  handler: httpAction(async (ctx, request) => {
+    const body = await request.json();
+
+    const result = await ctx.runMutation(api.ctf.registerOrRejoin, {
+      courseKey: body.courseKey,
+      name: body.name,
+      codespaceName: body.codespaceName ?? undefined
+    });
+
+    return jsonResponse(result);
+  })
+});
+
+http.route({
   path: "/register",
+  method: "OPTIONS",
+  handler: httpAction(async () => preflight())
+});
+
+http.route({
+  path: "/api/register",
   method: "OPTIONS",
   handler: httpAction(async () => preflight())
 });
@@ -68,7 +90,31 @@ http.route({
 });
 
 http.route({
+  path: "/api/report-success",
+  method: "POST",
+  handler: httpAction(async (ctx, request) => {
+    const body = await request.json();
+
+    const result = await ctx.runMutation(api.ctf.reportSuccess, {
+      courseKey: body.courseKey,
+      studentId: body.studentId,
+      challengeId: body.challengeId,
+      points: body.points,
+      source: body.source
+    });
+
+    return jsonResponse(result);
+  })
+});
+
+http.route({
   path: "/report-success",
+  method: "OPTIONS",
+  handler: httpAction(async () => preflight())
+});
+
+http.route({
+  path: "/api/report-success",
   method: "OPTIONS",
   handler: httpAction(async () => preflight())
 });
@@ -83,7 +129,22 @@ http.route({
 });
 
 http.route({
+  path: "/api/leaderboard",
+  method: "GET",
+  handler: httpAction(async (ctx) => {
+    const board = await ctx.runQuery(api.admin.leaderboard, {});
+    return jsonResponse(board);
+  })
+});
+
+http.route({
   path: "/leaderboard",
+  method: "OPTIONS",
+  handler: httpAction(async () => preflight())
+});
+
+http.route({
+  path: "/api/leaderboard",
   method: "OPTIONS",
   handler: httpAction(async () => preflight())
 });
