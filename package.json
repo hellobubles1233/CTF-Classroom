@@ -15,7 +15,7 @@
     "leaderboard": "node scripts/ctf.js leaderboard",
     "start:web": "node web/server.js",
     "start:student-agent": "node scripts/student-agent.js",
-    "start:student-agent:bg": "bash scripts/start-student-agent.sh",
+    "start:student-agent:bg": "node scripts/start-student-agent-bg.js",
     "convex:dev": "npx convex dev",
     "convex:deploy": "npx convex deploy"
   },

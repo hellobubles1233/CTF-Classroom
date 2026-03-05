@@ -1,15 +1,10 @@
-#!/usr/bin/env bash
-set -euo pipefail
+#!/usr/bin/env sh
+set -eu
 
 mkdir -p .ctf/runtime submissions workspaces data
 
 if [ ! -f data/leaderboard.json ]; then
-  cat > data/leaderboard.json <<'JSON'
-{
-  "updatedAt": null,
-  "players": []
-}
-JSON
+  printf '{\n  "updatedAt": null,\n  "players": []\n}\n' > data/leaderboard.json
 fi
 
 if [ ! -f .env ]; then
