@@ -5,7 +5,7 @@
     "ghcr.io/devcontainers/features/git:1": {}
   },
   "postCreateCommand": "cd ctf-classroom && npm install && bash scripts/setup-env.sh",
-  "postAttachCommand": "cd ctf-classroom && npm run start:student-agent:bg",
+  "postAttachCommand": "npm run start:student-agent:bg",
   "customizations": {
     "vscode": {
       "extensions": [
