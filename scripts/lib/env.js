@@ -23,6 +23,10 @@ function loadEnv() {
   if (!process.env.CTF_COURSE_KEY) {
     process.env.CTF_COURSE_KEY = "0com";
   }
+
+  if (!process.env.CTF_CENTRAL_URL) {
+    process.env.CTF_CENTRAL_URL = "https://outstanding-elk-594.eu-west-1.convex.site";
+  }
 }
 
 module.exports = { loadEnv };
