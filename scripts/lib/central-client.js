@@ -17,31 +17,61 @@ function getCentralBaseUrl() {
   return url.endsWith("/") ? url.slice(0, -1) : url;
 }
 
+function candidateBaseUrls() {
+  const primary = getCentralBaseUrl();
+  const urls = [primary];
+
+  // Some environments have DNS issues with region-qualified convex.site hosts.
+  const regionHostMatch = primary.match(/^(https:\/\/[^./]+)\.[a-z0-9-]+(\.convex\.site)$/i);
+  if (regionHostMatch) {
+    urls.push(`${regionHostMatch[1]}${regionHostMatch[2]}`);
+  }
+
+  return [...new Set(urls)];
+}
+
 function getCourseKey() {
   return envRequired("CTF_COURSE_KEY");
 }
 
 async function postJSON(pathname, payload) {
-  const url = `${getCentralBaseUrl()}${pathname}`;
-  const response = await fetch(url, {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify(payload)
-  });
+  let lastNetworkError = null;
 
-  const text = await response.text();
-  let data;
-  try {
-    data = text ? JSON.parse(text) : {};
-  } catch {
-    data = { raw: text };
+  for (const baseUrl of candidateBaseUrls()) {
+    const url = `${baseUrl}${pathname}`;
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      const text = await response.text();
+      let data;
+      try {
+        data = text ? JSON.parse(text) : {};
+      } catch {
+        data = { raw: text };
+      }
+
+      if (!response.ok) {
+        throw new Error(`Central API ${pathname} failed (${response.status}): ${JSON.stringify(data)}`);
+      }
+
+      return data;
+    } catch (error) {
+      // Stop on HTTP-level errors from the API, but retry on network-level failures.
+      if (error && /Central API/.test(String(error.message || ""))) {
+        throw error;
+      }
+      lastNetworkError = error;
+    }
   }
 
-  if (!response.ok) {
-    throw new Error(`Central API ${pathname} failed (${response.status}): ${JSON.stringify(data)}`);
-  }
-
-  return data;
+  const details = lastNetworkError && lastNetworkError.cause
+    ? `${lastNetworkError.message} (${lastNetworkError.cause.code || "no-code"})`
+    : String(lastNetworkError && lastNetworkError.message ? lastNetworkError.message : lastNetworkError);
+  throw new Error(`Central API ${pathname} network error: ${details}`);
 }
 
 async function registerOrRejoin(name) {

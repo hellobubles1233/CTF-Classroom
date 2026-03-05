@@ -43,7 +43,7 @@ function appendPending(event) {
 
 async function flushPending() {
   const session = loadSession();
-  if (!session || !fs.existsSync(pendingFile)) return;
+  if (!session || !session.studentId || !fs.existsSync(pendingFile)) return;
 
   const lines = fs
     .readFileSync(pendingFile, "utf8")
@@ -85,7 +85,8 @@ const server = http.createServer(async (req, res) => {
     const session = loadSession();
     return json(res, 200, {
       session,
-      codespaceName: process.env.CODESPACE_NAME || null
+      codespaceName: process.env.CODESPACE_NAME || null,
+      centralConfigured: Boolean(process.env.CTF_CENTRAL_URL && process.env.CTF_COURSE_KEY)
     });
   }
 
@@ -99,13 +100,27 @@ const server = http.createServer(async (req, res) => {
       const session = {
         studentId: central.studentId,
         name: central.name,
-        registeredAt: new Date().toISOString()
+        registeredAt: new Date().toISOString(),
+        offline: false
       };
       saveSession(session);
       await flushPending();
       return json(res, 200, { ok: true, session });
     } catch (error) {
-      return json(res, 500, { error: error.message });
+      const session = {
+        studentId: null,
+        name,
+        registeredAt: new Date().toISOString(),
+        offline: true
+      };
+      saveSession(session);
+      return json(res, 202, {
+        ok: false,
+        offline: true,
+        session,
+        message: "Central registration unavailable. Joined locally; retry Join/Rejoin later to sync.",
+        error: error.message
+      });
     }
   }
 
@@ -124,6 +139,15 @@ const server = http.createServer(async (req, res) => {
       source: String(body.source || "local-agent"),
       createdAt: new Date().toISOString()
     };
+
+    if (!session.studentId) {
+      appendPending(payload);
+      return json(res, 202, {
+        ok: false,
+        queued: true,
+        message: "Session not synced with central yet. Event queued."
+      });
+    }
 
     try {
       const result = await reportSuccess(session, payload.challengeId, payload.points, payload.source);
