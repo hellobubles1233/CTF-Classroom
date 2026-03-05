@@ -1,5 +1,7 @@
 # CTF Classroom Admin Foundation
 
+https://stackblitz.com/github/hellobubles1233/CTF-Classroom
+
 This setup focuses on the **admin platform layer** first:
 - student check-in from each Codespace
 - central user/session/progress storage in Convex
