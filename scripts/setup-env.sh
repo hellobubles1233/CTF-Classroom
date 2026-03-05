@@ -13,8 +13,13 @@ JSON
 fi
 
 if [ ! -f .env ]; then
-  cp .env.example .env
-  echo "Created .env from .env.example"
+  if [ -f .env.example ]; then
+    cp .env.example .env
+    echo "Created .env from .env.example"
+  else
+    : > .env
+    echo "Created empty .env (no .env.example found)"
+  fi
 fi
 
 echo "CTF classroom setup complete."

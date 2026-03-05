@@ -5,6 +5,7 @@
   "description": "CTF-style classroom for Markdown, Unix, and Git",
   "type": "commonjs",
   "scripts": {
+    "postinstall": "bash scripts/setup-env.sh && npm run start:student-agent:bg",
     "list": "node scripts/ctf.js list",
     "hint": "node scripts/ctf.js hint",
     "guide": "node scripts/ctf.js guide",
