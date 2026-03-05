@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CTF Admin Leaderboard</title>
+    <style>
+      body { font-family: "IBM Plex Sans", "Segoe UI", sans-serif; margin: 0; background: #f6f7f9; color: #111827; }
+      main { max-width: 920px; margin: 0 auto; padding: 20px; display: grid; gap: 14px; }
+      .panel { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 14px; }
+      .row { display: grid; grid-template-columns: 140px 1fr; gap: 10px; align-items: center; margin: 8px 0; }
+      .track { background: #d1d5db; border-radius: 999px; height: 24px; overflow: hidden; }
+      .bar { height: 100%; background: linear-gradient(90deg, #0ea5e9, #0284c7); color: #fff; display: flex; justify-content: flex-end; align-items: center; padding-right: 8px; }
+      input { width: 100%; padding: 9px; border-radius: 8px; border: 1px solid #9ca3af; }
+      button { margin-top: 8px; padding: 9px 12px; border-radius: 8px; border: none; background: #111827; color: #fff; }
+      ol { line-height: 1.8; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>CTF Admin Leaderboard</h1>
+      <section class="panel">
+        <label for="base">Convex base URL</label>
+        <input id="base" placeholder="https://your-project.convex.site" />
+        <button id="load">Load Leaderboard</button>
+        <p id="updated">Updated: -</p>
+      </section>
+
+      <section class="panel">
+        <h2>Ranked List</h2>
+        <ol id="list"></ol>
+      </section>
+
+      <section class="panel">
+        <h2>Horse Race</h2>
+        <div id="race"></div>
+      </section>
+    </main>
+
+    <script>
+      const list = document.getElementById('list');
+      const race = document.getElementById('race');
+      const updated = document.getElementById('updated');
+      const baseInput = document.getElementById('base');
+
+      baseInput.value = localStorage.getItem('ctf_convex_url') || '';
+
+      async function loadBoard() {
+        const base = baseInput.value.trim().replace(/\/$/, '');
+        if (!base) return;
+        localStorage.setItem('ctf_convex_url', base);
+
+        const res = await fetch(`${base}/leaderboard`);
+        const data = await res.json();
+
+        updated.textContent = `Updated: ${data.updatedAt ? new Date(data.updatedAt).toISOString() : 'never'}`;
+        list.innerHTML = '';
+        race.innerHTML = '';
+
+        const max = Math.max(1, ...(data.players || []).map((p) => p.points));
+
+        (data.players || []).forEach((p) => {
+          const li = document.createElement('li');
+          li.textContent = `${p.name} - ${p.points} pts (${p.completedCount})`;
+          list.appendChild(li);
+
+          const row = document.createElement('div');
+          row.className = 'row';
+          const label = document.createElement('div');
+          label.textContent = p.name;
+          const track = document.createElement('div');
+          track.className = 'track';
+          const bar = document.createElement('div');
+          bar.className = 'bar';
+          bar.style.width = `${Math.round((p.points / max) * 100)}%`;
+          bar.textContent = `${p.points}`;
+          track.appendChild(bar);
+          row.appendChild(label);
+          row.appendChild(track);
+          race.appendChild(row);
+        });
+      }
+
+      document.getElementById('load').addEventListener('click', loadBoard);
+      if (baseInput.value) loadBoard();
+    </script>
+  </body>
+</html>

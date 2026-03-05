@@ -1,0 +1,293 @@
+[
+  {
+    "id": "md-01",
+    "category": "markdown",
+    "level": "basic",
+    "title": "First README",
+    "brief": "Create a Markdown file with a title and checklist.",
+    "hint": "Use # for heading and - [ ] for checklist items.",
+    "guide": [
+      "Create folder: workspaces/{user}/markdown",
+      "Create file: workspaces/{user}/markdown/README.md",
+      "Add heading: # My First Markdown Challenge",
+      "Add two checklist items with - [ ] syntax"
+    ],
+    "checks": [
+      {
+        "type": "path_exists",
+        "path": "workspaces/{user}/markdown/README.md",
+        "kind": "file"
+      },
+      {
+        "type": "file_contains_regex",
+        "path": "workspaces/{user}/markdown/README.md",
+        "regex": "^#\\s+My First Markdown Challenge",
+        "flags": "m"
+      },
+      {
+        "type": "file_contains_regex",
+        "path": "workspaces/{user}/markdown/README.md",
+        "regex": "^- \\[ \\] .+",
+        "flags": "m"
+      }
+    ],
+    "points": 10
+  },
+  {
+    "id": "md-02",
+    "category": "markdown",
+    "level": "intermediate",
+    "title": "Link + Code Block",
+    "brief": "Document a command with a fenced code block and one link.",
+    "hint": "Use ```bash for command blocks and [label](url) for links.",
+    "guide": [
+      "Edit workspaces/{user}/markdown/README.md",
+      "Add section heading: ## Useful Commands",
+      "Add fenced bash block that includes ls -la",
+      "Add a link to https://git-scm.com"
+    ],
+    "checks": [
+      {
+        "type": "file_contains_regex",
+        "path": "workspaces/{user}/markdown/README.md",
+        "regex": "^##\\s+Useful Commands",
+        "flags": "m"
+      },
+      {
+        "type": "file_contains",
+        "path": "workspaces/{user}/markdown/README.md",
+        "text": "```bash"
+      },
+      {
+        "type": "file_contains",
+        "path": "workspaces/{user}/markdown/README.md",
+        "text": "ls -la"
+      },
+      {
+        "type": "file_contains",
+        "path": "workspaces/{user}/markdown/README.md",
+        "text": "[Git](https://git-scm.com)"
+      }
+    ],
+    "points": 15
+  },
+  {
+    "id": "unix-01",
+    "category": "unix",
+    "level": "basic",
+    "title": "Directory Builder",
+    "brief": "Create a directory and a file in the correct path.",
+    "hint": "Use mkdir -p, cd, and touch.",
+    "guide": [
+      "Run: mkdir -p workspaces/{user}/unix-basics/notes",
+      "Run: cd workspaces/{user}/unix-basics/notes",
+      "Run: touch intro.txt"
+    ],
+    "checks": [
+      {
+        "type": "path_exists",
+        "path": "workspaces/{user}/unix-basics/notes",
+        "kind": "dir"
+      },
+      {
+        "type": "path_exists",
+        "path": "workspaces/{user}/unix-basics/notes/intro.txt",
+        "kind": "file"
+      },
+      {
+        "type": "command_logged",
+        "regex": "mkdir\\s+-p\\s+workspaces/.+/unix-basics/notes"
+      }
+    ],
+    "points": 15
+  },
+  {
+    "id": "unix-02",
+    "category": "unix",
+    "level": "intermediate",
+    "title": "Rename + Echo",
+    "brief": "Rename a file and write a line into it.",
+    "hint": "Use mv and echo \"text\" > file.",
+    "guide": [
+      "Run: mv workspaces/{user}/unix-basics/notes/intro.txt workspaces/{user}/unix-basics/notes/welcome.txt",
+      "Run: echo \"Linux powers teams\" > workspaces/{user}/unix-basics/notes/welcome.txt"
+    ],
+    "checks": [
+      {
+        "type": "path_missing",
+        "path": "workspaces/{user}/unix-basics/notes/intro.txt"
+      },
+      {
+        "type": "path_exists",
+        "path": "workspaces/{user}/unix-basics/notes/welcome.txt",
+        "kind": "file"
+      },
+      {
+        "type": "file_contains",
+        "path": "workspaces/{user}/unix-basics/notes/welcome.txt",
+        "text": "Linux powers teams"
+      },
+      {
+        "type": "command_logged",
+        "regex": "mv\\s+workspaces/.+/intro.txt\\s+workspaces/.+/welcome.txt"
+      }
+    ],
+    "points": 20
+  },
+  {
+    "id": "unix-03",
+    "category": "unix",
+    "level": "advanced",
+    "title": "Pipeline Expert",
+    "brief": "Use a pipeline to count lines and store result.",
+    "hint": "cat file | wc -l > count.txt",
+    "guide": [
+      "Create file workspaces/{user}/unix-basics/notes/log.txt with at least 3 lines",
+      "Run a pipeline that writes line count into workspaces/{user}/unix-basics/notes/count.txt"
+    ],
+    "checks": [
+      {
+        "type": "path_exists",
+        "path": "workspaces/{user}/unix-basics/notes/count.txt",
+        "kind": "file"
+      },
+      {
+        "type": "file_contains_regex",
+        "path": "workspaces/{user}/unix-basics/notes/count.txt",
+        "regex": "\\d+",
+        "flags": ""
+      },
+      {
+        "type": "command_logged",
+        "regex": "\\|\\s*wc\\s+-l"
+      }
+    ],
+    "points": 25
+  },
+  {
+    "id": "git-01",
+    "category": "git",
+    "level": "basic",
+    "title": "Init + First Commit",
+    "brief": "Create a git repo and first commit in your workspace.",
+    "hint": "git init, git add, git commit -m.",
+    "guide": [
+      "Run: mkdir -p workspaces/{user}/git-lab",
+      "Run inside repo: git init",
+      "Create file NOTES.md with one line",
+      "Run: git add NOTES.md",
+      "Run: git commit -m \"chore: first commit\""
+    ],
+    "checks": [
+      {
+        "type": "path_exists",
+        "path": "workspaces/{user}/git-lab/.git",
+        "kind": "dir"
+      },
+      {
+        "type": "git_commit_count_min",
+        "repo": "workspaces/{user}/git-lab",
+        "min": 1
+      },
+      {
+        "type": "git_commit_message_regex",
+        "repo": "workspaces/{user}/git-lab",
+        "regex": "chore:\\s+first commit"
+      }
+    ],
+    "points": 20
+  },
+  {
+    "id": "git-02",
+    "category": "git",
+    "level": "intermediate",
+    "title": "Branch Workflow",
+    "brief": "Create a feature branch and commit on it.",
+    "hint": "git checkout -b feature/<name>",
+    "guide": [
+      "In workspaces/{user}/git-lab create branch feature/docs",
+      "Add file BRANCH.md",
+      "Commit with message feat: add branch file"
+    ],
+    "checks": [
+      {
+        "type": "git_branch_exists",
+        "repo": "workspaces/{user}/git-lab",
+        "branch": "feature/docs"
+      },
+      {
+        "type": "path_exists",
+        "path": "workspaces/{user}/git-lab/BRANCH.md",
+        "kind": "file"
+      },
+      {
+        "type": "git_commit_message_regex",
+        "repo": "workspaces/{user}/git-lab",
+        "regex": "feat:\\s+add branch file"
+      }
+    ],
+    "points": 25
+  },
+  {
+    "id": "git-03",
+    "category": "git",
+    "level": "advanced",
+    "title": "Merge Back",
+    "brief": "Merge feature/docs into main with a merge commit.",
+    "hint": "Checkout main and run git merge --no-ff feature/docs.",
+    "guide": [
+      "Checkout main in workspaces/{user}/git-lab",
+      "Merge with: git merge --no-ff feature/docs -m \"merge: feature/docs\""
+    ],
+    "checks": [
+      {
+        "type": "git_commit_message_regex",
+        "repo": "workspaces/{user}/git-lab",
+        "regex": "merge:\\s+feature/docs"
+      },
+      {
+        "type": "command_logged",
+        "regex": "git\\s+merge\\s+--no-ff\\s+feature/docs"
+      }
+    ],
+    "points": 30
+  },
+  {
+    "id": "boss-01",
+    "category": "mixed",
+    "level": "advanced",
+    "title": "Release Notes Boss",
+    "brief": "Create release notes in Markdown and commit via Git.",
+    "hint": "Combine mkdir, echo/cat, markdown headings, git add/commit.",
+    "guide": [
+      "Create file workspaces/{user}/git-lab/docs/RELEASE_NOTES.md",
+      "Include heading # Release Notes and at least one bullet",
+      "Commit with message docs: add release notes"
+    ],
+    "checks": [
+      {
+        "type": "path_exists",
+        "path": "workspaces/{user}/git-lab/docs/RELEASE_NOTES.md",
+        "kind": "file"
+      },
+      {
+        "type": "file_contains_regex",
+        "path": "workspaces/{user}/git-lab/docs/RELEASE_NOTES.md",
+        "regex": "^#\\s+Release Notes",
+        "flags": "m"
+      },
+      {
+        "type": "file_contains_regex",
+        "path": "workspaces/{user}/git-lab/docs/RELEASE_NOTES.md",
+        "regex": "^- .+",
+        "flags": "m"
+      },
+      {
+        "type": "git_commit_message_regex",
+        "repo": "workspaces/{user}/git-lab",
+        "regex": "docs:\\s+add release notes"
+      }
+    ],
+    "points": 40
+  }
+]

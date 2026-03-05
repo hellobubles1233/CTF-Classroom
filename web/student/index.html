@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CTF Student Check-In</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="card">
+      <h1>CTF Check-In</h1>
+      <p id="status">Loading session status...</p>
+
+      <form id="signupForm">
+        <label for="name">Display name</label>
+        <input id="name" name="name" required minlength="2" maxlength="40" />
+        <button type="submit">Join / Rejoin</button>
+      </form>
+
+      <section class="small">
+        <h2>How this works</h2>
+        <p>Use the same name to rejoin if your Codespace restarts.</p>
+      </section>
+    </main>
+
+    <script src="/app.js"></script>
+  </body>
+</html>

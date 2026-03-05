@@ -1,0 +1,24 @@
+{
+  "name": "ctf-classroom",
+  "version": "1.0.0",
+  "private": true,
+  "description": "CTF-style classroom for Markdown, Unix, and Git",
+  "type": "commonjs",
+  "scripts": {
+    "list": "node scripts/ctf.js list",
+    "hint": "node scripts/ctf.js hint",
+    "guide": "node scripts/ctf.js guide",
+    "check": "node scripts/ctf.js check",
+    "submit": "node scripts/ctf.js submit",
+    "report:success": "node scripts/report-success.js",
+    "leaderboard": "node scripts/ctf.js leaderboard",
+    "start:web": "node web/server.js",
+    "start:student-agent": "node scripts/student-agent.js",
+    "start:student-agent:bg": "bash scripts/start-student-agent.sh",
+    "convex:dev": "npx convex dev",
+    "convex:deploy": "npx convex deploy"
+  },
+  "devDependencies": {
+    "convex": "^1.25.4"
+  }
+}

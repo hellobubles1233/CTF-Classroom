@@ -1,0 +1,79 @@
+:root {
+  --bg: #f7f5ed;
+  --panel: #ffffff;
+  --ink: #1f2937;
+  --accent: #0d9488;
+  --track: #d6d3d1;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
+  color: var(--ink);
+  background: radial-gradient(circle at 10% 10%, #fff7ed 0%, #f7f5ed 55%);
+}
+
+.layout {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 24px;
+  display: grid;
+  gap: 16px;
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid #e7e5e4;
+  border-radius: 14px;
+  padding: 16px;
+}
+
+.ranked {
+  line-height: 1.8;
+}
+
+.race {
+  display: grid;
+  gap: 10px;
+}
+
+.horse-row {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  gap: 10px;
+  align-items: center;
+}
+
+.track {
+  height: 28px;
+  background: var(--track);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.horse {
+  height: 100%;
+  width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 10px;
+  color: #fff;
+  background: linear-gradient(90deg, #14b8a6, var(--accent));
+  border-radius: 999px;
+  transition: width 1s ease;
+}
+
+@media (max-width: 680px) {
+  .horse-row {
+    grid-template-columns: 1fr;
+  }
+
+  .horse-label {
+    font-weight: 600;
+  }
+}
