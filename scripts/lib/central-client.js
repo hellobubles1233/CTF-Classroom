@@ -21,10 +21,22 @@ function candidateBaseUrls() {
   const primary = getCentralBaseUrl();
   const urls = [primary];
 
-  // Some environments have DNS issues with region-qualified convex.site hosts.
-  const regionHostMatch = primary.match(/^(https:\/\/[^./]+)\.[a-z0-9-]+(\.convex\.site)$/i);
-  if (regionHostMatch) {
-    urls.push(`${regionHostMatch[1]}${regionHostMatch[2]}`);
+  // Some environments have DNS issues with region-qualified convex hosts.
+  const regionSiteMatch = primary.match(/^(https:\/\/[^./]+)\.[a-z0-9-]+(\.convex\.site)$/i);
+  if (regionSiteMatch) {
+    urls.push(`${regionSiteMatch[1]}${regionSiteMatch[2]}`);
+  }
+
+  const regionCloudMatch = primary.match(/^(https:\/\/[^./]+)\.[a-z0-9-]+(\.convex\.cloud)$/i);
+  if (regionCloudMatch) {
+    urls.push(`${regionCloudMatch[1]}${regionCloudMatch[2]}`);
+  }
+
+  if (/\.convex\.site$/i.test(primary)) {
+    urls.push(primary.replace(/\.convex\.site$/i, ".convex.cloud"));
+  }
+  if (/\.convex\.cloud$/i.test(primary)) {
+    urls.push(primary.replace(/\.convex\.cloud$/i, ".convex.site"));
   }
 
   return [...new Set(urls)];

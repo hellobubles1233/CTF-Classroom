@@ -34,7 +34,8 @@ document.getElementById('signupForm').addEventListener('submit', async (event) =
   }
 
   if (data.offline || (data.session && !data.session.studentId)) {
-    status.textContent = `Joined locally as ${data.session.name}. Central is unreachable right now; click Join / Rejoin later to sync.`;
+    const details = data.error ? ` Details: ${data.error}` : '';
+    status.textContent = `Joined locally as ${data.session.name}. Central is unreachable right now; click Join / Rejoin later to sync.${details}`;
     return;
   }
 
