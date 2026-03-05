@@ -5,7 +5,7 @@
   "description": "CTF-style classroom for Markdown, Unix, and Git",
   "type": "commonjs",
   "scripts": {
-    "postinstall": "node scripts/setup-env.js && npm run start:student-agent:bg",
+    "postinstall": "node scripts/setup-env.js && npm run restart:student-agent:bg",
     "list": "node scripts/ctf.js list",
     "hint": "node scripts/ctf.js hint",
     "guide": "node scripts/ctf.js guide",
@@ -16,6 +16,7 @@
     "start:web": "node web/server.js",
     "start:student-agent": "node scripts/student-agent.js",
     "start:student-agent:bg": "node scripts/start-student-agent-bg.js",
+    "restart:student-agent:bg": "node scripts/start-student-agent-bg.js --restart",
     "convex:dev": "npx convex dev",
     "convex:deploy": "npx convex deploy"
   },

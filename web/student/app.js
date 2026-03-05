@@ -5,7 +5,8 @@ async function loadStatus() {
 
   if (data.session) {
     if (data.session.offline || !data.session.studentId) {
-      status.textContent = `Signed in locally as ${data.session.name}. Central sync pending; rejoin later.`;
+      const details = data.session.lastCentralError ? ` Last error: ${data.session.lastCentralError}` : '';
+      status.textContent = `Signed in locally as ${data.session.name}. Central sync pending; rejoin later.${details}`;
     } else {
       status.textContent = `Signed in as ${data.session.name} (${data.session.studentId})`;
     }

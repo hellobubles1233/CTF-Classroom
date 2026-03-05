@@ -107,11 +107,13 @@ const server = http.createServer(async (req, res) => {
       await flushPending();
       return json(res, 200, { ok: true, session });
     } catch (error) {
+      const errorMessage = error && error.message ? error.message : "fetch failed";
       const session = {
         studentId: null,
         name,
         registeredAt: new Date().toISOString(),
-        offline: true
+        offline: true,
+        lastCentralError: errorMessage
       };
       saveSession(session);
       return json(res, 202, {
@@ -119,7 +121,7 @@ const server = http.createServer(async (req, res) => {
         offline: true,
         session,
         message: "Central registration unavailable. Joined locally; retry Join/Rejoin later to sync.",
-        error: error.message
+        error: errorMessage
       });
     }
   }
