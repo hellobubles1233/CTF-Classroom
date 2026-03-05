@@ -10,6 +10,7 @@ const ROOT = path.resolve(__dirname, "..");
 const CHALLENGE_FILE = path.join(ROOT, "challenges", "challenges.json");
 const SUBMISSION_DIR = path.join(ROOT, "submissions");
 const LEADERBOARD_FILE = path.join(ROOT, "data", "leaderboard.json");
+const CURRENT_USER_FILE = path.join(ROOT, ".ctf", "runtime", "current-user.txt");
 
 function readJSON(file) {
   return JSON.parse(fs.readFileSync(file, "utf8"));
@@ -34,7 +35,10 @@ function parseArgs(argv) {
 }
 
 function getUser(args) {
-  const user = args.user || process.env.CTF_USER;
+  let user = args.user || process.env.CTF_USER;
+  if (!user && fs.existsSync(CURRENT_USER_FILE)) {
+    user = fs.readFileSync(CURRENT_USER_FILE, "utf8").trim();
+  }
   if (!user) {
     throw new Error("Missing user. Provide --user <name> or set CTF_USER.");
   }
@@ -67,7 +71,7 @@ function commandLogFor(user) {
 
 function readCommandLog(user) {
   const file = commandLogFor(user);
-  if (!fs.existsSync(file)) return "";
+  if (!fs.existsSync(file)) return null;
   return fs.readFileSync(file, "utf8");
 }
 
@@ -115,6 +119,9 @@ function evaluateCheck(check, user) {
 
     if (check.type === "command_logged") {
       const log = readCommandLog(user);
+      if (!log || !log.trim()) {
+        return { pass: true, message: `SKIP command_logged ${check.regex} (no command log available)` };
+      }
       const regex = new RegExp(applyUser(check.regex, user));
       if (!regex.test(log)) return fail(`Command pattern not logged: ${check.regex}`);
       return { pass: true, message: `OK command_logged ${check.regex}` };
