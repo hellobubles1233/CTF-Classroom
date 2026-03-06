@@ -3,32 +3,18 @@
     "id": "md-01",
     "category": "markdown",
     "level": "basic",
-    "title": "First README",
-    "brief": "Create a Markdown file with a title and checklist.",
-    "hint": "Use # for heading and - [ ] for checklist items.",
+    "title": "Create Markdown File",
+    "brief": "Create Markdown.md in your markdown workspace.",
+    "hint": "Use mkdir -p and create workspaces/{user}/markdown/Markdown.md.",
     "guide": [
       "Create folder: workspaces/{user}/markdown",
-      "Create file: workspaces/{user}/markdown/README.md",
-      "Add heading: # My First Markdown Challenge",
-      "Add two checklist items with - [ ] syntax"
+      "Create file: workspaces/{user}/markdown/Markdown.md"
     ],
     "checks": [
       {
         "type": "path_exists",
-        "path": "workspaces/{user}/markdown/README.md",
+        "path": "workspaces/{user}/markdown/Markdown.md",
         "kind": "file"
-      },
-      {
-        "type": "file_contains_regex",
-        "path": "workspaces/{user}/markdown/README.md",
-        "regex": "^#\\s+My First Markdown Challenge",
-        "flags": "m"
-      },
-      {
-        "type": "file_contains_regex",
-        "path": "workspaces/{user}/markdown/README.md",
-        "regex": "^- \\[ \\] .+",
-        "flags": "m"
       }
     ],
     "points": 10
@@ -37,36 +23,168 @@
     "id": "md-02",
     "category": "markdown",
     "level": "intermediate",
-    "title": "Link + Code Block",
-    "brief": "Document a command with a fenced code block and one link.",
-    "hint": "Use ```bash for command blocks and [label](url) for links.",
+    "title": "Headers and Lists",
+    "brief": "Add H1-H6, a bullet list, and a numbered list with sub-items.",
+    "hint": "Use # to ######, -, and 1. with indented sub-items.",
     "guide": [
-      "Edit workspaces/{user}/markdown/README.md",
-      "Add section heading: ## Useful Commands",
-      "Add fenced bash block that includes ls -la",
-      "Add a link to https://git-scm.com"
+      "Edit workspaces/{user}/markdown/Markdown.md",
+      "Add headings H1 to H6",
+      "Add a bullet list",
+      "Add a numbered list with at least one sub-item"
     ],
     "checks": [
       {
         "type": "file_contains_regex",
-        "path": "workspaces/{user}/markdown/README.md",
-        "regex": "^##\\s+Useful Commands",
+        "path": "workspaces/{user}/markdown/Markdown.md",
+        "regex": "^#\\s+.+",
+        "flags": "m"
+      },
+      {
+        "type": "file_contains_regex",
+        "path": "workspaces/{user}/markdown/Markdown.md",
+        "regex": "^##\\s+.+",
+        "flags": "m"
+      },
+      {
+        "type": "file_contains_regex",
+        "path": "workspaces/{user}/markdown/Markdown.md",
+        "regex": "^###\\s+.+",
+        "flags": "m"
+      },
+      {
+        "type": "file_contains_regex",
+        "path": "workspaces/{user}/markdown/Markdown.md",
+        "regex": "^####\\s+.+",
+        "flags": "m"
+      },
+      {
+        "type": "file_contains_regex",
+        "path": "workspaces/{user}/markdown/Markdown.md",
+        "regex": "^#####\\s+.+",
+        "flags": "m"
+      },
+      {
+        "type": "file_contains_regex",
+        "path": "workspaces/{user}/markdown/Markdown.md",
+        "regex": "^######\\s+.+",
+        "flags": "m"
+      },
+      {
+        "type": "file_contains_regex",
+        "path": "workspaces/{user}/markdown/Markdown.md",
+        "regex": "^-\\s+.+",
+        "flags": "m"
+      },
+      {
+        "type": "file_contains_regex",
+        "path": "workspaces/{user}/markdown/Markdown.md",
+        "regex": "^\\d+\\.\\s+.+",
+        "flags": "m"
+      },
+      {
+        "type": "file_contains_regex",
+        "path": "workspaces/{user}/markdown/Markdown.md",
+        "regex": "^[ \\t]{2,}[-*]\\s+.+",
+        "flags": "m"
+      }
+    ],
+    "points": 15
+  },
+  {
+    "id": "md-03",
+    "category": "markdown",
+    "level": "intermediate",
+    "title": "Callout and PowerShell Block",
+    "brief": "Add a callout line and a PowerShell code block with Hello World.",
+    "hint": "Use > for callout and ```powershell for fenced block.",
+    "guide": [
+      "Edit workspaces/{user}/markdown/Markdown.md",
+      "Add a callout line that starts with >",
+      "Add a fenced powershell code block",
+      "Include Hello World inside the powershell block"
+    ],
+    "checks": [
+      {
+        "type": "file_contains_regex",
+        "path": "workspaces/{user}/markdown/Markdown.md",
+        "regex": "^>\\s+.+",
         "flags": "m"
       },
       {
         "type": "file_contains",
-        "path": "workspaces/{user}/markdown/README.md",
-        "text": "```bash"
+        "path": "workspaces/{user}/markdown/Markdown.md",
+        "text": "```powershell"
       },
       {
-        "type": "file_contains",
-        "path": "workspaces/{user}/markdown/README.md",
-        "text": "ls -la"
-      },
+        "type": "file_contains_regex",
+        "path": "workspaces/{user}/markdown/Markdown.md",
+        "regex": "hello\\s+world",
+        "flags": "i"
+      }
+    ],
+    "points": 15
+  },
+  {
+    "id": "md-04",
+    "category": "markdown",
+    "level": "basic",
+    "title": "Clickable Link",
+    "brief": "Add at least one clickable Markdown link.",
+    "hint": "Use [label](https://example.com).",
+    "guide": [
+      "Edit workspaces/{user}/markdown/Markdown.md",
+      "Add one clickable Markdown link"
+    ],
+    "checks": [
       {
-        "type": "file_contains",
-        "path": "workspaces/{user}/markdown/README.md",
-        "text": "[Git](https://git-scm.com)"
+        "type": "file_contains_regex",
+        "path": "workspaces/{user}/markdown/Markdown.md",
+        "regex": "\\[[^\\]]+\\]\\(https?:\\/\\/[^)]+\\)",
+        "flags": ""
+      }
+    ],
+    "points": 10
+  },
+  {
+    "id": "md-05",
+    "category": "markdown",
+    "level": "basic",
+    "title": "Image Embed",
+    "brief": "Add one Markdown image embed.",
+    "hint": "Use ![alt text](https://example.com/image.png).",
+    "guide": [
+      "Edit workspaces/{user}/markdown/Markdown.md",
+      "Add one Markdown image embed"
+    ],
+    "checks": [
+      {
+        "type": "file_contains_regex",
+        "path": "workspaces/{user}/markdown/Markdown.md",
+        "regex": "!\\[[^\\]]*\\]\\([^)]+\\)",
+        "flags": ""
+      }
+    ],
+    "points": 10
+  },
+  {
+    "id": "md-06",
+    "category": "markdown",
+    "level": "intermediate",
+    "title": "Markdown Table",
+    "brief": "Add a Markdown table with header, separator, and one row.",
+    "hint": "Use pipe table syntax with a separator line.",
+    "guide": [
+      "Edit workspaces/{user}/markdown/Markdown.md",
+      "Add a table header row with at least two columns",
+      "Add a separator row",
+      "Add at least one data row"
+    ],
+    "checks": [
+      {
+        "type": "file_contains_regex",
+        "path": "workspaces/{user}/markdown/Markdown.md",
+        "regex": "\\|[^\\n]+\\|[^\\n]+\\|\\n\\|\\s*[-:]+\\s*\\|\\s*[-:]+\\s*\\|\\n\\|[^\\n]+\\|[^\\n]+\\|",
+        "flags": "m"
       }
     ],
     "points": 15
