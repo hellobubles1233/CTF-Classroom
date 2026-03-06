@@ -8,6 +8,7 @@ const { execSync } = require("child_process");
 const {
   registerOrRejoin,
   reportSuccess,
+  fetchProgress,
   saveSession,
   loadSession
 } = require("./lib/central-client");
@@ -21,6 +22,7 @@ const CHALLENGE_FILE = path.join(ROOT, "challenges", "challenges.json");
 const SUBMISSION_DIR = path.join(ROOT, "submissions");
 const LEADERBOARD_FILE = path.join(ROOT, "data", "leaderboard.json");
 const pendingFile = path.join(ROOT, ".ctf", "runtime", "pending-successes.jsonl");
+let hydratedSessionKey = null;
 
 function json(res, status, body) {
   res.writeHead(status, { "content-type": "application/json; charset=utf-8" });
@@ -303,6 +305,62 @@ function buildChallengeState(user, options = {}) {
   };
 }
 
+async function hydrateSubmissionFromCentral(session) {
+  if (!session || !session.name || !session.studentId) return;
+
+  const challenges = loadChallenges();
+  const knownIds = new Set(challenges.map((c) => c.id));
+  let submission = scoreSubmission(loadSubmission(session.name), challenges);
+  const merged = new Set(submission.completed);
+  const localCount = merged.size;
+
+  let remote;
+  try {
+    remote = await fetchProgress(session);
+  } catch {
+    return;
+  }
+
+  let changed = false;
+
+  const remoteIds = Array.isArray(remote.completedIds) ? remote.completedIds : [];
+  if (remoteIds.length > 0) {
+    for (const id of remoteIds) {
+      if (knownIds.has(id) && !merged.has(id)) {
+        merged.add(id);
+        changed = true;
+      }
+    }
+  } else {
+    const targetCount = Math.max(0, Math.floor(Number(remote.completedCount || 0)));
+    if (targetCount > localCount) {
+      for (const challenge of challenges) {
+        if (merged.size >= targetCount) break;
+        if (!merged.has(challenge.id)) {
+          merged.add(challenge.id);
+          changed = true;
+        }
+      }
+    }
+  }
+
+  if (!changed) return;
+
+  submission.completed = Array.from(merged);
+  submission.updatedAt = new Date().toISOString();
+  submission = scoreSubmission(submission, challenges);
+  saveSubmission(session.name, submission);
+  updateLeaderboard(loadAllSubmissions(challenges));
+}
+
+async function ensureHydrated(session) {
+  if (!session || !session.studentId || !session.name) return;
+  const key = `${session.studentId}:${session.name.toLowerCase()}`;
+  if (hydratedSessionKey === key) return;
+  await hydrateSubmissionFromCentral(session);
+  hydratedSessionKey = key;
+}
+
 function appendPending(event) {
   fs.mkdirSync(path.dirname(pendingFile), { recursive: true });
   fs.appendFileSync(pendingFile, JSON.stringify(event) + "\n", "utf8");
@@ -389,6 +447,7 @@ const server = http.createServer(async (req, res) => {
         return json(res, 401, { error: "No local session. Sign up first." });
       }
 
+      await ensureHydrated(session);
       const state = buildChallengeState(session.name, { autoAdvance: true });
       await syncNewlyPassed(session, state.newlyPassed);
       return json(res, 200, {
@@ -404,6 +463,7 @@ const server = http.createServer(async (req, res) => {
         return json(res, 401, { error: "No local session. Sign up first." });
       }
 
+      await ensureHydrated(session);
       const state = buildChallengeState(session.name, { autoAdvance: true });
       await syncNewlyPassed(session, state.newlyPassed);
       return json(res, 200, {
@@ -426,8 +486,10 @@ const server = http.createServer(async (req, res) => {
           registeredAt: new Date().toISOString(),
           offline: false
         };
+        hydratedSessionKey = null;
         saveSession(session);
         await flushPending();
+        await ensureHydrated(session);
         return json(res, 200, { ok: true, session });
       } catch (error) {
         const errorMessage = error && error.message ? error.message : "fetch failed";
@@ -442,6 +504,7 @@ const server = http.createServer(async (req, res) => {
           lastCentralError: errorMessage
         };
         saveSession(session);
+        hydratedSessionKey = null;
         return json(res, 202, {
           ok: false,
           offline: true,

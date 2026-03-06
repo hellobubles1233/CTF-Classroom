@@ -129,6 +129,36 @@ http.route({
 });
 
 http.route({
+  path: "/progress",
+  method: "POST",
+  handler: httpAction(async (ctx, request) => {
+    const body = await request.json();
+
+    const progress = await ctx.runQuery(api.ctf.getProgress, {
+      courseKey: body.courseKey,
+      studentId: body.studentId
+    });
+
+    return jsonResponse(progress);
+  })
+});
+
+http.route({
+  path: "/api/progress",
+  method: "POST",
+  handler: httpAction(async (ctx, request) => {
+    const body = await request.json();
+
+    const progress = await ctx.runQuery(api.ctf.getProgress, {
+      courseKey: body.courseKey,
+      studentId: body.studentId
+    });
+
+    return jsonResponse(progress);
+  })
+});
+
+http.route({
   path: "/api/leaderboard",
   method: "GET",
   handler: httpAction(async (ctx) => {
@@ -139,6 +169,18 @@ http.route({
 
 http.route({
   path: "/leaderboard",
+  method: "OPTIONS",
+  handler: httpAction(async () => preflight())
+});
+
+http.route({
+  path: "/progress",
+  method: "OPTIONS",
+  handler: httpAction(async () => preflight())
+});
+
+http.route({
+  path: "/api/progress",
   method: "OPTIONS",
   handler: httpAction(async () => preflight())
 });

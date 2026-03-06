@@ -95,6 +95,54 @@ async function callConvexMutation(pathName, argsObject) {
   );
 }
 
+async function callConvexQuery(pathName, argsObject) {
+  let lastError = null;
+
+  for (const baseUrl of candidateBaseUrls()) {
+    const url = `${baseUrl}/api/query`;
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          path: pathName,
+          format: "convex_encoded_json",
+          args: [convexToJson(argsObject)]
+        })
+      });
+
+      const text = await response.text();
+      let data;
+      try {
+        data = text ? JSON.parse(text) : {};
+      } catch {
+        data = { raw: text };
+      }
+
+      if (!response.ok) {
+        lastError = new Error(`Convex query ${pathName} failed (${response.status}): ${JSON.stringify(data)}`);
+        continue;
+      }
+
+      if (data.status === "success") {
+        return jsonToConvex(data.value);
+      }
+
+      if (data.status === "error") {
+        throw new Error(data.errorMessage || `Convex query ${pathName} returned error.`);
+      }
+
+      throw new Error(`Convex query ${pathName} invalid response: ${JSON.stringify(data)}`);
+    } catch (error) {
+      lastError = error;
+    }
+  }
+
+  throw new Error(
+    `Convex query ${pathName} unreachable: ${lastError && lastError.message ? lastError.message : String(lastError)}`
+  );
+}
+
 function candidatePathnames(pathname) {
   const p = pathname.startsWith("/") ? pathname : `/${pathname}`;
   const paths = [p];
@@ -157,6 +205,33 @@ async function postJSON(pathname, payload) {
   throw new Error(`Central API ${pathname} network error: ${details}`);
 }
 
+async function getJSON(pathname) {
+  let lastError = null;
+  for (const baseUrl of candidateBaseUrls()) {
+    for (const apiPath of candidatePathnames(pathname)) {
+      const url = `${baseUrl}${apiPath}`;
+      try {
+        const response = await fetch(url, { method: "GET" });
+        if (response.status === 404) continue;
+        const text = await response.text();
+        let data;
+        try {
+          data = text ? JSON.parse(text) : {};
+        } catch {
+          data = { raw: text };
+        }
+        if (!response.ok) {
+          throw new Error(`Central API ${apiPath} failed (${response.status}): ${JSON.stringify(data)}`);
+        }
+        return data;
+      } catch (error) {
+        lastError = error;
+      }
+    }
+  }
+  throw new Error(`Central API ${pathname} unavailable: ${lastError && lastError.message ? lastError.message : String(lastError)}`);
+}
+
 async function registerOrRejoin(name) {
   const codespaceName = process.env.CODESPACE_NAME || process.env.HOSTNAME || undefined;
   const payload = {
@@ -196,6 +271,61 @@ async function reportSuccess(session, challengeId, points, source) {
   }
 }
 
+async function fetchProgress(session) {
+  if (!session || !session.studentId) {
+    return { completedIds: [], completedCount: 0, totalPoints: 0 };
+  }
+
+  const payload = {
+    courseKey: getCourseKey(),
+    studentId: session.studentId
+  };
+
+  try {
+    const progress = await postJSON("/progress", payload);
+    return {
+      completedIds: Array.isArray(progress.completedIds) ? progress.completedIds : [],
+      completedCount: Number(progress.completedCount || 0),
+      totalPoints: Number(progress.totalPoints || 0)
+    };
+  } catch (error) {
+    const message = String(error && error.message ? error.message : error);
+
+    if (/route not found \(404\)|failed \(404\)/i.test(message)) {
+      try {
+        const progress = await callConvexQuery("ctf:getProgress", payload);
+        return {
+          completedIds: Array.isArray(progress.completedIds) ? progress.completedIds : [],
+          completedCount: Number(progress.completedCount || 0),
+          totalPoints: Number(progress.totalPoints || 0)
+        };
+      } catch (queryError) {
+        const queryMessage = String(queryError && queryError.message ? queryError.message : queryError);
+        // Fallback to count-only estimate from leaderboard if progress query isn't deployed yet.
+        if (session.name) {
+          try {
+            const board = await getJSON("/leaderboard");
+            const players = Array.isArray(board.players) ? board.players : [];
+            const entry = players.find((p) => String((p.name ?? p.user) || "").toLowerCase() === session.name.toLowerCase());
+            if (entry) {
+              return {
+                completedIds: [],
+                completedCount: Number(entry.completedCount || 0),
+                totalPoints: Number(entry.points || 0)
+              };
+            }
+          } catch {
+            // Ignore fallback error and rethrow original query error below.
+          }
+        }
+        throw new Error(queryMessage);
+      }
+    }
+
+    throw error;
+  }
+}
+
 function saveSession(session) {
   fs.mkdirSync(path.dirname(SESSION_FILE), { recursive: true });
   fs.writeFileSync(SESSION_FILE, JSON.stringify(session, null, 2) + "\n", "utf8");
@@ -213,6 +343,7 @@ function loadSession() {
 module.exports = {
   registerOrRejoin,
   reportSuccess,
+  fetchProgress,
   saveSession,
   loadSession,
   SESSION_FILE

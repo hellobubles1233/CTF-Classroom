@@ -125,6 +125,44 @@ export const reportSuccess = mutation({
   }
 });
 
+export const getProgress = query({
+  args: {
+    courseKey: v.string(),
+    studentId: v.id("students")
+  },
+  handler: async (ctx, args) => {
+    assertCourseKey(args.courseKey);
+
+    const completions = await ctx.db
+      .query("challengeCompletions")
+      .withIndex("by_student", (q) => q.eq("studentId", args.studentId))
+      .collect();
+
+    const byChallenge = new Map<string, { challengeId: string; points: number; reportedAt: number }>();
+    for (const c of completions) {
+      const existing = byChallenge.get(c.challengeId);
+      if (!existing || c.reportedAt > existing.reportedAt) {
+        byChallenge.set(c.challengeId, {
+          challengeId: c.challengeId,
+          points: c.points,
+          reportedAt: c.reportedAt
+        });
+      }
+    }
+
+    const unique = Array.from(byChallenge.values()).sort((a, b) => a.reportedAt - b.reportedAt);
+    const completedIds = unique.map((x) => x.challengeId);
+    const totalPoints = unique.reduce((sum, x) => sum + Math.max(0, Math.floor(x.points)), 0);
+
+    return {
+      studentId: args.studentId,
+      completedIds,
+      completedCount: completedIds.length,
+      totalPoints
+    };
+  }
+});
+
 export const getStudent = query({
   args: {
     studentId: v.id("students")
