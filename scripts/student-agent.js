@@ -162,6 +162,17 @@ function checkChallenge(challenge, user) {
   return { passed, results };
 }
 
+function completedChallengeResult(challenge) {
+  const checks = challenge && Array.isArray(challenge.checks) ? challenge.checks : [];
+  return {
+    passed: true,
+    results: checks.map((check) => ({
+      pass: true,
+      message: `Restored from saved progress: ${check.type}`
+    }))
+  };
+}
+
 function loadSubmission(user) {
   const file = path.join(SUBMISSION_DIR, `${user}.json`);
   if (!fs.existsSync(file)) {
@@ -322,6 +333,8 @@ function buildChallengeState(user, options = {}) {
   if (viewIndex !== -1) {
     if (viewIndex === currentIndex) {
       viewResult = currentResult;
+    } else if (completedSet.has(challenges[viewIndex].id)) {
+      viewResult = completedChallengeResult(challenges[viewIndex]);
     } else {
       viewResult = checkChallenge(challenges[viewIndex], user);
     }

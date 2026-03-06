@@ -16,6 +16,7 @@ const currentCommandsEl = document.getElementById('currentCommands');
 const currentHintEl = document.getElementById('currentHint');
 const currentResultsEl = document.getElementById('currentResults');
 const manualCheckBtnEl = document.getElementById('manualCheckBtn');
+const toastEl = document.getElementById('toast');
 
 const markdownSolutionSectionEl = document.getElementById('markdownSolutionSection');
 const markdownCooldownTextEl = document.getElementById('markdownCooldownText');
@@ -27,6 +28,7 @@ let pollTimer = null;
 let cooldownTimer = null;
 let selectedChallengeId = null;
 let lastState = null;
+let toastTimer = null;
 const markdownReadyAtById = Object.create(null);
 const MARKDOWN_COOLDOWN_MS = 60_000;
 
@@ -53,6 +55,7 @@ const RESULT_TRANSLATIONS = [
   ['Not a directory:', 'Kein Ordner-Pfad:'],
   ['Command pattern not logged:', 'Befehlsmuster nicht protokolliert:'],
   ['SKIP command_logged', 'ÜBERSPRUNGEN command_logged'],
+  ['Restored from saved progress:', 'Aus gespeichertem Fortschritt wiederhergestellt:'],
   ['Unknown check type:', 'Unbekannter Check-Typ:'],
   ['Error in check', 'Fehler im Check'],
   ['OK ', 'OK ']
@@ -162,7 +165,22 @@ function translateCheckMessage(message) {
 }
 
 function showToast(message) {
-  setStatus(message);
+  if (!toastEl) {
+    setStatus(message);
+    return;
+  }
+
+  toastEl.textContent = message;
+  toastEl.hidden = false;
+  toastEl.classList.add('show');
+
+  if (toastTimer) {
+    clearTimeout(toastTimer);
+  }
+  toastTimer = setTimeout(() => {
+    toastEl.classList.remove('show');
+    toastEl.hidden = true;
+  }, 1800);
 }
 
 function setStatus(text) {
@@ -270,7 +288,7 @@ function toCopyButton(text, label = 'Befehl kopieren') {
 
   button.addEventListener('click', async () => {
     await navigator.clipboard.writeText(text);
-    showToast(`Kopiert: ${text}`);
+    showToast('Unix-Befehl kopiert.');
   });
 
   return button;
@@ -382,6 +400,11 @@ function renderCurrentChallenge(state) {
     dot.className = 'result-dot';
     dot.setAttribute('aria-label', li.title);
     li.appendChild(dot);
+
+    const label = document.createElement('span');
+    label.className = 'result-label';
+    label.textContent = result.pass ? 'Bestanden' : 'Fehlgeschlagen';
+    li.appendChild(label);
 
     currentResultsEl.appendChild(li);
   });
