@@ -394,7 +394,8 @@ function renderCurrentChallenge(state) {
     li.className = result.pass ? 'result-pass' : 'result-fail';
     const msg = translateCheckMessage(result.message);
     const prefix = result.pass ? 'BESTANDEN' : 'NICHT BESTANDEN';
-    li.title = `${prefix} - ${msg}`;
+    const resultTitle = String(result.label || 'Check');
+    li.title = `${resultTitle}: ${prefix} - ${msg}`;
 
     const dot = document.createElement('span');
     dot.className = 'result-dot';
@@ -403,7 +404,7 @@ function renderCurrentChallenge(state) {
 
     const label = document.createElement('span');
     label.className = 'result-label';
-    label.textContent = result.pass ? 'Bestanden' : 'Fehlgeschlagen';
+    label.textContent = resultTitle;
     li.appendChild(label);
 
     currentResultsEl.appendChild(li);

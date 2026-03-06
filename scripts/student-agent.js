@@ -81,8 +81,37 @@ function runGit(repoPath, cmd) {
   }).trim();
 }
 
+function checkLabel(check, user) {
+  const withUser = (value) => {
+    const raw = String(value || "");
+    return user ? applyUser(raw, user) : raw;
+  };
+
+  switch (check.type) {
+    case "path_exists":
+      return `Pfad vorhanden: ${withUser(check.path)}`;
+    case "path_missing":
+      return `Pfad fehlt: ${withUser(check.path)}`;
+    case "file_contains":
+      return `Text in Datei: ${withUser(check.path)}`;
+    case "file_contains_regex":
+      return `Format in Datei: ${withUser(check.path)}`;
+    case "command_logged":
+      return "Befehl protokolliert";
+    case "git_commit_count_min":
+      return `Commit-Anzahl: ${withUser(check.repo)}`;
+    case "git_commit_message_regex":
+      return `Commit-Text: ${withUser(check.repo)}`;
+    case "git_branch_exists":
+      return `Branch vorhanden: ${check.branch || ""}`.trim();
+    default:
+      return check.type || "Check";
+  }
+}
+
 function evaluateCheck(check, user) {
-  const fail = (message) => ({ pass: false, message });
+  const label = checkLabel(check, user);
+  const fail = (message) => ({ pass: false, message, label });
 
   try {
     if (check.type === "path_exists") {
@@ -90,13 +119,13 @@ function evaluateCheck(check, user) {
       if (!fs.existsSync(p)) return fail(`Missing path: ${check.path}`);
       if (check.kind === "file" && !fs.statSync(p).isFile()) return fail(`Not a file: ${check.path}`);
       if (check.kind === "dir" && !fs.statSync(p).isDirectory()) return fail(`Not a directory: ${check.path}`);
-      return { pass: true, message: `OK path_exists ${check.path}` };
+      return { pass: true, message: `OK path_exists ${check.path}`, label };
     }
 
     if (check.type === "path_missing") {
       const p = resolvePath(check.path, user);
       if (fs.existsSync(p)) return fail(`Path should be missing: ${check.path}`);
-      return { pass: true, message: `OK path_missing ${check.path}` };
+      return { pass: true, message: `OK path_missing ${check.path}`, label };
     }
 
     if (check.type === "file_contains") {
@@ -104,7 +133,7 @@ function evaluateCheck(check, user) {
       if (!fs.existsSync(p)) return fail(`File missing: ${check.path}`);
       const content = fs.readFileSync(p, "utf8");
       if (!content.includes(applyUser(check.text, user))) return fail(`Text not found in ${check.path}`);
-      return { pass: true, message: `OK file_contains ${check.path}` };
+      return { pass: true, message: `OK file_contains ${check.path}`, label };
     }
 
     if (check.type === "file_contains_regex") {
@@ -113,24 +142,24 @@ function evaluateCheck(check, user) {
       const content = fs.readFileSync(p, "utf8");
       const regex = new RegExp(applyUser(check.regex, user), check.flags || "");
       if (!regex.test(content)) return fail(`Regex not matched in ${check.path}`);
-      return { pass: true, message: `OK file_contains_regex ${check.path}` };
+      return { pass: true, message: `OK file_contains_regex ${check.path}`, label };
     }
 
     if (check.type === "command_logged") {
       const log = readCommandLog(user);
       if (!log || !log.trim()) {
-        return { pass: true, message: `SKIP command_logged ${check.regex} (no command log available)` };
+        return { pass: true, message: `SKIP command_logged ${check.regex} (no command log available)`, label };
       }
       const regex = new RegExp(applyUser(check.regex, user));
       if (!regex.test(log)) return fail(`Command pattern not logged: ${check.regex}`);
-      return { pass: true, message: `OK command_logged ${check.regex}` };
+      return { pass: true, message: `OK command_logged ${check.regex}`, label };
     }
 
     if (check.type === "git_commit_count_min") {
       const repo = resolvePath(check.repo, user);
       const count = Number(runGit(repo, "rev-list --count HEAD"));
       if (Number.isNaN(count) || count < Number(check.min)) return fail(`Need at least ${check.min} commits in ${check.repo}`);
-      return { pass: true, message: `OK git_commit_count_min ${check.repo}` };
+      return { pass: true, message: `OK git_commit_count_min ${check.repo}`, label };
     }
 
     if (check.type === "git_commit_message_regex") {
@@ -138,7 +167,7 @@ function evaluateCheck(check, user) {
       const logs = runGit(repo, "log --pretty=%s -n 30");
       const regex = new RegExp(applyUser(check.regex, user));
       if (!regex.test(logs)) return fail(`Commit message regex not found: ${check.regex}`);
-      return { pass: true, message: `OK git_commit_message_regex ${check.regex}` };
+      return { pass: true, message: `OK git_commit_message_regex ${check.regex}`, label };
     }
 
     if (check.type === "git_branch_exists") {
@@ -146,7 +175,7 @@ function evaluateCheck(check, user) {
       const branches = runGit(repo, "branch --list");
       const regex = new RegExp(`(^|\\n)[* ]\\s*${check.branch.replace(/[.*+?^${}()|[\\]\\]/g, "\\$&")}(\\n|$)`);
       if (!regex.test(branches + "\n")) return fail(`Branch not found: ${check.branch}`);
-      return { pass: true, message: `OK git_branch_exists ${check.branch}` };
+      return { pass: true, message: `OK git_branch_exists ${check.branch}`, label };
     }
 
     return fail(`Unknown check type: ${check.type}`);
@@ -162,13 +191,14 @@ function checkChallenge(challenge, user) {
   return { passed, results };
 }
 
-function completedChallengeResult(challenge) {
+function completedChallengeResult(challenge, user) {
   const checks = challenge && Array.isArray(challenge.checks) ? challenge.checks : [];
   return {
     passed: true,
     results: checks.map((check) => ({
       pass: true,
-      message: `Restored from saved progress: ${check.type}`
+      message: `Restored from saved progress: ${check.type}`,
+      label: checkLabel(check, user)
     }))
   };
 }
@@ -334,7 +364,7 @@ function buildChallengeState(user, options = {}) {
     if (viewIndex === currentIndex) {
       viewResult = currentResult;
     } else if (completedSet.has(challenges[viewIndex].id)) {
-      viewResult = completedChallengeResult(challenges[viewIndex]);
+      viewResult = completedChallengeResult(challenges[viewIndex], user);
     } else {
       viewResult = checkChallenge(challenges[viewIndex], user);
     }
@@ -413,11 +443,243 @@ async function hydrateSubmissionFromCentral(session) {
   updateLeaderboard(loadAllSubmissions(challenges));
 }
 
+function ensureGuideCommandsLogged(challenge, user) {
+  const guide = Array.isArray(challenge.guide) ? challenge.guide : [];
+  const commands = guide
+    .map((step) => applyUser(String(step || ""), user))
+    .map((step) => {
+      const match = step.match(/^Run:\s*(.+)$/i);
+      return match ? match[1].trim() : null;
+    })
+    .filter(Boolean);
+
+  if (commands.length === 0) return;
+
+  const file = commandLogFor(user);
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  const existing = fs.existsSync(file) ? fs.readFileSync(file, "utf8") : "";
+  const lines = [];
+  for (const cmd of commands) {
+    if (!existing.includes(cmd)) {
+      lines.push(`${new Date().toISOString()}|${cmd}`);
+    }
+  }
+  if (lines.length > 0) {
+    fs.appendFileSync(file, `${lines.join("\n")}\n`, "utf8");
+  }
+}
+
+function shellQuote(value) {
+  return `'${String(value).replace(/'/g, "'\\''")}'`;
+}
+
+function runGitMaybe(repoPath, cmd) {
+  try {
+    return runGit(repoPath, cmd);
+  } catch {
+    return "";
+  }
+}
+
+function ensureGitRepo(repoPath) {
+  fs.mkdirSync(repoPath, { recursive: true });
+  const gitDir = path.join(repoPath, ".git");
+  if (fs.existsSync(gitDir) && fs.statSync(gitDir).isDirectory()) return;
+  try {
+    runGit(repoPath, "init -b main");
+  } catch {
+    runGitMaybe(repoPath, "init");
+  }
+}
+
+function gitCommitAllowEmpty(repoPath, message) {
+  const msg = String(message || "restore: progress sync");
+  runGitMaybe(
+    repoPath,
+    `-c user.name=${shellQuote("CTF Restore")} -c user.email=${shellQuote("ctf-restore@local")} commit --allow-empty -m ${shellQuote(msg)}`
+  );
+}
+
+function gitCommitCount(repoPath) {
+  const raw = runGitMaybe(repoPath, "rev-list --count HEAD");
+  const count = Number(raw);
+  return Number.isFinite(count) ? count : 0;
+}
+
+function ensureGitCommitCount(repoPath, minCount) {
+  const min = Math.max(0, Number(minCount || 0));
+  ensureGitRepo(repoPath);
+  let count = gitCommitCount(repoPath);
+  while (count < min) {
+    gitCommitAllowEmpty(repoPath, `restore: commit ${count + 1}`);
+    const next = gitCommitCount(repoPath);
+    if (next <= count) break;
+    count = next;
+  }
+}
+
+function commitMessageFromRegex(regexSource) {
+  let value = String(regexSource || "").trim();
+  value = value.replace(/^\^/, "").replace(/\$$/, "");
+  value = value.replace(/\\s\+/g, " ");
+  value = value.replace(/\\s\*/g, " ");
+  value = value.replace(/\\([:/._-])/g, "$1");
+  value = value.replace(/[()|[\]{}]/g, "");
+  value = value.replace(/[+*?]/g, "");
+  value = value.replace(/\s+/g, " ").trim();
+  if (!value || value.length > 120) return "restore: progress sync";
+  return value;
+}
+
+function ensureGitCommitMessage(repoPath, regexSource, user) {
+  const source = applyUser(String(regexSource || ""), user);
+  if (!source) return;
+  ensureGitCommitCount(repoPath, 1);
+  const logs = runGitMaybe(repoPath, "log --pretty=%s -n 50");
+  const regex = new RegExp(source);
+  if (regex.test(logs)) return;
+  gitCommitAllowEmpty(repoPath, commitMessageFromRegex(source));
+}
+
+function ensureGitBranch(repoPath, branchName) {
+  if (!branchName) return;
+  ensureGitCommitCount(repoPath, 1);
+  const branches = `${runGitMaybe(repoPath, "branch --list")}\n`;
+  const escaped = String(branchName).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const regex = new RegExp(`(^|\\n)[* ]\\s*${escaped}(\\n|$)`);
+  if (regex.test(branches)) return;
+  runGitMaybe(repoPath, `branch ${shellQuote(String(branchName))}`);
+}
+
+function regexSampleContent(regexSource, targetPath) {
+  const source = String(regexSource || "");
+  const lowerPath = String(targetPath || "").toLowerCase();
+  const samples = [];
+
+  if (lowerPath.endsWith(".md")) {
+    if (source.includes("^#\\s+")) samples.push("# Titel\n");
+    if (source.includes("^##\\s+")) samples.push("## Untertitel\n");
+    if (source.includes("^###\\s+")) samples.push("### Abschnitt\n");
+    if (source.includes("^####\\s+")) samples.push("#### Detail\n");
+    if (source.includes("^#####\\s+")) samples.push("##### Extra\n");
+    if (source.includes("^######\\s+")) samples.push("###### Fein\n");
+    if (source.includes("^-\\s+")) samples.push("- Punkt\n");
+    if (source.includes("^\\d+\\.\\s+")) samples.push("1. Schritt\n");
+    if (source.includes("^[ \\t]{2,}[-*]\\s+")) samples.push("  - Unterpunkt\n");
+    if (source.includes("^>\\s+")) samples.push("> Hinweis\n");
+    if (source.includes("hello\\s+world")) samples.push("Hello World\n");
+    if (source.includes("\\[[^\\]]+\\]\\(https?:\\/\\/[^)]+\\)")) samples.push("[Link](https://example.com)\n");
+    if (source.includes("!\\[[^\\]]*\\]\\([^)]+\\)")) samples.push("![Bild](https://example.com/image.png)\n");
+    if (source.includes("\\|[^\\n]+\\|[^\\n]+\\|")) {
+      samples.push("| Spalte A | Spalte B |\n| --- | --- |\n| Wert 1 | Wert 2 |\n");
+    }
+  }
+
+  if (source.includes("\\d+")) samples.push("3\n");
+  if (samples.length === 0) samples.push("Restored\n");
+
+  return samples;
+}
+
+function ensureFileMatchesRegex(targetPath, check, user) {
+  fs.mkdirSync(path.dirname(targetPath), { recursive: true });
+  const source = applyUser(String(check.regex || ""), user);
+  const regex = new RegExp(source, check.flags || "");
+  const existing = fs.existsSync(targetPath) ? fs.readFileSync(targetPath, "utf8") : "";
+  if (regex.test(existing)) return;
+
+  for (const sample of regexSampleContent(source, targetPath)) {
+    const merged = existing
+      ? `${existing.replace(/\s*$/, "")}\n${String(sample).replace(/\s*$/, "")}\n`
+      : String(sample);
+    if (regex.test(merged)) {
+      fs.writeFileSync(targetPath, merged, "utf8");
+      return;
+    }
+  }
+
+  if (!existing) {
+    fs.writeFileSync(targetPath, "Restored\n", "utf8");
+  }
+}
+
+function restoreChallengeArtifacts(challenge, user) {
+  if (!challenge) return;
+  const checks = Array.isArray(challenge.checks) ? challenge.checks : [];
+
+  for (const check of checks) {
+    const targetPath = check.path ? resolvePath(check.path, user) : null;
+    const repoPath = check.repo ? resolvePath(check.repo, user) : null;
+
+    if (check.type === "path_exists" && targetPath) {
+      if (check.kind === "dir" && path.basename(targetPath) === ".git") {
+        ensureGitRepo(path.dirname(targetPath));
+        continue;
+      }
+      if (check.kind === "dir") {
+        fs.mkdirSync(targetPath, { recursive: true });
+      } else if (check.kind === "file") {
+        fs.mkdirSync(path.dirname(targetPath), { recursive: true });
+        if (!fs.existsSync(targetPath)) {
+          fs.writeFileSync(targetPath, "", "utf8");
+        }
+      }
+    }
+
+    if (check.type === "path_missing" && targetPath) {
+      fs.rmSync(targetPath, { recursive: true, force: true });
+    }
+
+    if (check.type === "file_contains" && targetPath) {
+      fs.mkdirSync(path.dirname(targetPath), { recursive: true });
+      const desired = applyUser(String(check.text || ""), user);
+      const existing = fs.existsSync(targetPath) ? fs.readFileSync(targetPath, "utf8") : "";
+      if (!existing.includes(desired)) {
+        const next = existing ? `${existing.trimEnd()}\n${desired}\n` : `${desired}\n`;
+        fs.writeFileSync(targetPath, next, "utf8");
+      }
+    }
+
+    if (check.type === "file_contains_regex" && targetPath) {
+      ensureFileMatchesRegex(targetPath, check, user);
+    }
+
+    if (check.type === "git_commit_count_min" && repoPath) {
+      ensureGitCommitCount(repoPath, check.min);
+    }
+
+    if (check.type === "git_commit_message_regex" && repoPath) {
+      ensureGitCommitMessage(repoPath, check.regex, user);
+    }
+
+    if (check.type === "git_branch_exists" && repoPath) {
+      ensureGitBranch(repoPath, check.branch);
+    }
+  }
+
+  ensureGuideCommandsLogged(challenge, user);
+}
+
+function restoreCompletedChallengeArtifacts(user) {
+  const challenges = loadChallenges();
+  const submission = scoreSubmission(loadSubmission(user), challenges);
+  const completedSet = new Set(submission.completed);
+
+  for (const challenge of challenges) {
+    if (completedSet.has(challenge.id)) {
+      restoreChallengeArtifacts(challenge, user);
+    }
+  }
+}
+
 async function ensureHydrated(session) {
-  if (!session || !session.studentId || !session.name) return;
-  const key = `${session.studentId}:${session.name.toLowerCase()}`;
+  if (!session || !session.name) return;
+  const key = `${session.studentId || "local"}:${session.name.toLowerCase()}`;
   if (hydratedSessionKey === key) return;
-  await hydrateSubmissionFromCentral(session);
+  if (session.studentId) {
+    await hydrateSubmissionFromCentral(session);
+  }
+  restoreCompletedChallengeArtifacts(session.name);
   hydratedSessionKey = key;
 }
 
