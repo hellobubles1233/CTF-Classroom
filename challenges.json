@@ -3,12 +3,12 @@
     "id": "md-01",
     "category": "markdown",
     "level": "basic",
-    "title": "Create Markdown File",
-    "brief": "Create Markdown.md in your markdown workspace.",
-    "hint": "Use mkdir -p and create workspaces/{user}/markdown/Markdown.md.",
+    "title": "Markdown-Datei erstellen",
+    "brief": "Erstelle Markdown.md in deinem Markdown-Arbeitsbereich.",
+    "hint": "Erstelle die Datei in workspaces/{user}/markdown/Markdown.md.",
     "guide": [
-      "Create folder: workspaces/{user}/markdown",
-      "Create file: workspaces/{user}/markdown/Markdown.md"
+      "Ordner erstellen: workspaces/{user}/markdown",
+      "Datei erstellen: workspaces/{user}/markdown/Markdown.md"
     ],
     "checks": [
       {
@@ -23,14 +23,14 @@
     "id": "md-02",
     "category": "markdown",
     "level": "intermediate",
-    "title": "Headers and Lists",
-    "brief": "Add H1-H6, a bullet list, and a numbered list with sub-items.",
-    "hint": "Use # to ######, -, and 1. with indented sub-items.",
+    "title": "Überschriften und Listen",
+    "brief": "Füge H1-H6, eine Aufzählung und eine nummerierte Liste mit Unterpunkten hinzu.",
+    "hint": "Nutze # bis ###### sowie - und 1. mit eingerückten Unterpunkten.",
     "guide": [
-      "Edit workspaces/{user}/markdown/Markdown.md",
-      "Add headings H1 to H6",
-      "Add a bullet list",
-      "Add a numbered list with at least one sub-item"
+      "Bearbeite workspaces/{user}/markdown/Markdown.md",
+      "Füge Überschriften H1 bis H6 ein",
+      "Füge eine Aufzählungsliste ein",
+      "Füge eine nummerierte Liste mit mindestens einem Unterpunkt ein"
     ],
     "checks": [
       {
@@ -94,14 +94,14 @@
     "id": "md-03",
     "category": "markdown",
     "level": "intermediate",
-    "title": "Callout and PowerShell Block",
-    "brief": "Add a callout line and a PowerShell code block with Hello World.",
-    "hint": "Use > for callout and ```powershell for fenced block.",
+    "title": "Callout und PowerShell-Block",
+    "brief": "Füge eine Callout-Zeile und einen PowerShell-Codeblock mit Hello World ein.",
+    "hint": "Nutze > für Callout und ```powershell für den Block.",
     "guide": [
-      "Edit workspaces/{user}/markdown/Markdown.md",
-      "Add a callout line that starts with >",
-      "Add a fenced powershell code block",
-      "Include Hello World inside the powershell block"
+      "Bearbeite workspaces/{user}/markdown/Markdown.md",
+      "Füge eine Callout-Zeile ein, die mit > startet",
+      "Füge einen powershell-Codeblock ein",
+      "Nutze Hello World im powershell-Block"
     ],
     "checks": [
       {
@@ -128,12 +128,12 @@
     "id": "md-04",
     "category": "markdown",
     "level": "basic",
-    "title": "Clickable Link",
-    "brief": "Add at least one clickable Markdown link.",
-    "hint": "Use [label](https://example.com).",
+    "title": "Klickbarer Link",
+    "brief": "Füge mindestens einen klickbaren Markdown-Link ein.",
+    "hint": "Verwende [Text](https://beispiel.de).",
     "guide": [
-      "Edit workspaces/{user}/markdown/Markdown.md",
-      "Add one clickable Markdown link"
+      "Bearbeite workspaces/{user}/markdown/Markdown.md",
+      "Füge einen klickbaren Markdown-Link ein"
     ],
     "checks": [
       {
@@ -149,12 +149,12 @@
     "id": "md-05",
     "category": "markdown",
     "level": "basic",
-    "title": "Image Embed",
-    "brief": "Add one Markdown image embed.",
-    "hint": "Use ![alt text](https://example.com/image.png).",
+    "title": "Bild einbetten",
+    "brief": "Füge ein eingebettetes Markdown-Bild ein.",
+    "hint": "Verwende ![Alt-Text](https://beispiel.de/bild.png).",
     "guide": [
-      "Edit workspaces/{user}/markdown/Markdown.md",
-      "Add one Markdown image embed"
+      "Bearbeite workspaces/{user}/markdown/Markdown.md",
+      "Füge ein Markdown-Bild ein"
     ],
     "checks": [
       {
@@ -170,14 +170,14 @@
     "id": "md-06",
     "category": "markdown",
     "level": "intermediate",
-    "title": "Markdown Table",
-    "brief": "Add a Markdown table with header, separator, and one row.",
-    "hint": "Use pipe table syntax with a separator line.",
+    "title": "Markdown-Tabelle",
+    "brief": "Füge eine Tabelle mit Kopfzeile, Trennzeile und Datenzeile ein.",
+    "hint": "Nutze die Pipe-Syntax für Tabellen.",
     "guide": [
-      "Edit workspaces/{user}/markdown/Markdown.md",
-      "Add a table header row with at least two columns",
-      "Add a separator row",
-      "Add at least one data row"
+      "Bearbeite workspaces/{user}/markdown/Markdown.md",
+      "Füge eine Tabellen-Kopfzeile mit mindestens zwei Spalten ein",
+      "Füge eine Trennzeile ein",
+      "Füge mindestens eine Datenzeile ein"
     ],
     "checks": [
       {
@@ -193,9 +193,9 @@
     "id": "unix-01",
     "category": "unix",
     "level": "basic",
-    "title": "Directory Builder",
-    "brief": "Create a directory and a file in the correct path.",
-    "hint": "Use mkdir -p, cd, and touch.",
+    "title": "Ordnerstruktur bauen",
+    "brief": "Erstelle einen Ordner und eine Datei im korrekten Pfad.",
+    "hint": "Nutze mkdir -p, cd und touch.",
     "guide": [
       "Run: mkdir -p workspaces/{user}/unix-basics/notes",
       "Run: cd workspaces/{user}/unix-basics/notes",
@@ -223,9 +223,9 @@
     "id": "unix-02",
     "category": "unix",
     "level": "intermediate",
-    "title": "Rename + Echo",
-    "brief": "Rename a file and write a line into it.",
-    "hint": "Use mv and echo \"text\" > file.",
+    "title": "Umbenennen und Echo",
+    "brief": "Benenne eine Datei um und schreibe eine Zeile hinein.",
+    "hint": "Nutze mv und echo \"text\" > datei.",
     "guide": [
       "Run: mv workspaces/{user}/unix-basics/notes/intro.txt workspaces/{user}/unix-basics/notes/welcome.txt",
       "Run: echo \"Linux powers teams\" > workspaces/{user}/unix-basics/notes/welcome.txt"
@@ -256,12 +256,12 @@
     "id": "unix-03",
     "category": "unix",
     "level": "advanced",
-    "title": "Pipeline Expert",
-    "brief": "Use a pipeline to count lines and store result.",
-    "hint": "cat file | wc -l > count.txt",
+    "title": "Pipeline-Profi",
+    "brief": "Nutze eine Pipeline, um Zeilen zu zählen und zu speichern.",
+    "hint": "cat datei | wc -l > count.txt",
     "guide": [
-      "Create file workspaces/{user}/unix-basics/notes/log.txt with at least 3 lines",
-      "Run a pipeline that writes line count into workspaces/{user}/unix-basics/notes/count.txt"
+      "Erstelle die Datei workspaces/{user}/unix-basics/notes/log.txt mit mindestens 3 Zeilen",
+      "Run: cat workspaces/{user}/unix-basics/notes/log.txt | wc -l > workspaces/{user}/unix-basics/notes/count.txt"
     ],
     "checks": [
       {
@@ -286,13 +286,13 @@
     "id": "git-01",
     "category": "git",
     "level": "basic",
-    "title": "Init + First Commit",
-    "brief": "Create a git repo and first commit in your workspace.",
+    "title": "Init und erster Commit",
+    "brief": "Erstelle ein Git-Repo mit erstem Commit im Workspace.",
     "hint": "git init, git add, git commit -m.",
     "guide": [
       "Run: mkdir -p workspaces/{user}/git-lab",
-      "Run inside repo: git init",
-      "Create file NOTES.md with one line",
+      "Run im Repo: git init",
+      "Erstelle die Datei NOTES.md mit einer Zeile",
       "Run: git add NOTES.md",
       "Run: git commit -m \"chore: first commit\""
     ],
@@ -319,13 +319,13 @@
     "id": "git-02",
     "category": "git",
     "level": "intermediate",
-    "title": "Branch Workflow",
-    "brief": "Create a feature branch and commit on it.",
+    "title": "Branch-Workflow",
+    "brief": "Erstelle einen Feature-Branch und committe darauf.",
     "hint": "git checkout -b feature/<name>",
     "guide": [
-      "In workspaces/{user}/git-lab create branch feature/docs",
-      "Add file BRANCH.md",
-      "Commit with message feat: add branch file"
+      "Erstelle im Repo workspaces/{user}/git-lab den Branch feature/docs",
+      "Füge die Datei BRANCH.md hinzu",
+      "Committe mit: feat: add branch file"
     ],
     "checks": [
       {
@@ -350,12 +350,12 @@
     "id": "git-03",
     "category": "git",
     "level": "advanced",
-    "title": "Merge Back",
-    "brief": "Merge feature/docs into main with a merge commit.",
-    "hint": "Checkout main and run git merge --no-ff feature/docs.",
+    "title": "Zurück mergen",
+    "brief": "Merge feature/docs in main mit einem Merge-Commit.",
+    "hint": "Wechsle auf main und führe git merge --no-ff feature/docs aus.",
     "guide": [
-      "Checkout main in workspaces/{user}/git-lab",
-      "Merge with: git merge --no-ff feature/docs -m \"merge: feature/docs\""
+      "Wechsle auf main in workspaces/{user}/git-lab",
+      "Run: git merge --no-ff feature/docs -m \"merge: feature/docs\""
     ],
     "checks": [
       {
@@ -374,13 +374,13 @@
     "id": "boss-01",
     "category": "mixed",
     "level": "advanced",
-    "title": "Release Notes Boss",
-    "brief": "Create release notes in Markdown and commit via Git.",
-    "hint": "Combine mkdir, echo/cat, markdown headings, git add/commit.",
+    "title": "Release-Notes Boss",
+    "brief": "Erstelle Release Notes in Markdown und committe sie mit Git.",
+    "hint": "Kombiniere mkdir, echo/cat, Markdown-Überschriften und git commit.",
     "guide": [
-      "Create file workspaces/{user}/git-lab/docs/RELEASE_NOTES.md",
-      "Include heading # Release Notes and at least one bullet",
-      "Commit with message docs: add release notes"
+      "Erstelle die Datei workspaces/{user}/git-lab/docs/RELEASE_NOTES.md",
+      "Füge die Überschrift # Release Notes und mindestens einen Bullet hinzu",
+      "Committe mit: docs: add release notes"
     ],
     "checks": [
       {

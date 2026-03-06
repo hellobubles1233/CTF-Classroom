@@ -208,6 +208,24 @@ function firstIncompleteIndex(challenges, completedSet) {
   return challenges.findIndex((c) => !completedSet.has(c.id));
 }
 
+function buildChallengeView(challenge, user, result, isCurrent, isCompleted) {
+  if (!challenge) return null;
+  return {
+    id: challenge.id,
+    title: challenge.title,
+    brief: challenge.brief,
+    hint: challenge.hint || "",
+    category: challenge.category,
+    level: challenge.level,
+    points: challenge.points,
+    guide: (challenge.guide || []).map((step) => applyUser(step, user)),
+    results: result ? result.results : [],
+    passed: Boolean(result && result.passed),
+    isCurrent,
+    isCompleted
+  };
+}
+
 function buildProgressBars(challenges, completedSet) {
   const categories = ["markdown", "unix", "git"];
   return categories.map((key) => {
@@ -226,6 +244,7 @@ function buildProgressBars(challenges, completedSet) {
 
 function buildChallengeState(user, options = {}) {
   const autoAdvance = options.autoAdvance !== false;
+  const viewChallengeId = options.viewChallengeId || null;
   const challenges = loadChallenges();
 
   let submission = scoreSubmission(loadSubmission(user), challenges);
@@ -279,24 +298,52 @@ function buildChallengeState(user, options = {}) {
 
   const currentChallenge = currentIndex === -1
     ? null
-    : {
-        id: challenges[currentIndex].id,
-        title: challenges[currentIndex].title,
-        brief: challenges[currentIndex].brief,
-        hint: challenges[currentIndex].hint || "",
-        category: challenges[currentIndex].category,
-        level: challenges[currentIndex].level,
-        points: challenges[currentIndex].points,
-        guide: (challenges[currentIndex].guide || []).map((step) => applyUser(step, user)),
-        results: currentResult ? currentResult.results : [],
-        passed: Boolean(currentResult && currentResult.passed)
-      };
+    : buildChallengeView(
+      challenges[currentIndex],
+      user,
+      currentResult,
+      true,
+      completedSet.has(challenges[currentIndex].id)
+    );
+
+  let viewIndex = currentIndex;
+  if (viewChallengeId) {
+    const idx = challenges.findIndex((c) => c.id === viewChallengeId);
+    if (idx !== -1) {
+      const isCurrent = idx === currentIndex;
+      const isCompleted = completedSet.has(challenges[idx].id);
+      if (isCurrent || isCompleted) {
+        viewIndex = idx;
+      }
+    }
+  }
+
+  let viewResult = null;
+  if (viewIndex !== -1) {
+    if (viewIndex === currentIndex) {
+      viewResult = currentResult;
+    } else {
+      viewResult = checkChallenge(challenges[viewIndex], user);
+    }
+  }
+
+  const viewChallenge = viewIndex === -1
+    ? null
+    : buildChallengeView(
+      challenges[viewIndex],
+      user,
+      viewResult,
+      viewIndex === currentIndex,
+      completedSet.has(challenges[viewIndex].id)
+    );
 
   return {
     user,
     challenges: challengeList,
     currentIndex,
     currentChallenge,
+    viewChallenge,
+    viewChallengeId: viewChallenge ? viewChallenge.id : null,
     allCompleted: currentIndex === -1 && challenges.length > 0,
     completedCount: completedSet.size,
     totalCount: challenges.length,
@@ -447,8 +494,10 @@ const server = http.createServer(async (req, res) => {
         return json(res, 401, { error: "No local session. Sign up first." });
       }
 
+      const viewChallengeIdRaw = requestUrl.searchParams.get("viewChallengeId");
+      const viewChallengeId = viewChallengeIdRaw ? String(viewChallengeIdRaw).trim() : null;
       await ensureHydrated(session);
-      const state = buildChallengeState(session.name, { autoAdvance: true });
+      const state = buildChallengeState(session.name, { autoAdvance: true, viewChallengeId });
       await syncNewlyPassed(session, state.newlyPassed);
       return json(res, 200, {
         ok: true,
@@ -463,8 +512,11 @@ const server = http.createServer(async (req, res) => {
         return json(res, 401, { error: "No local session. Sign up first." });
       }
 
+      const body = await readBody(req);
+      const viewChallengeIdRaw = body && body.viewChallengeId ? String(body.viewChallengeId) : "";
+      const viewChallengeId = viewChallengeIdRaw.trim() || null;
       await ensureHydrated(session);
-      const state = buildChallengeState(session.name, { autoAdvance: true });
+      const state = buildChallengeState(session.name, { autoAdvance: true, viewChallengeId });
       await syncNewlyPassed(session, state.newlyPassed);
       return json(res, 200, {
         ok: true,

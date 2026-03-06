@@ -1,58 +1,83 @@
 :root {
-  --bg: #f4efe6;
-  --ink: #172554;
-  --card: #fffdf7;
-  --accent: #ea580c;
-  --good: #15803d;
-  --warn: #b45309;
-  --muted: #475569;
+  --bg0: #10121a;
+  --bg1: #161a24;
+  --bg2: #1a2030;
+  --panel: #1d2433;
+  --panel-2: #1a2130;
+  --line: #2b3346;
+  --text: #e7ecff;
+  --muted: #9ca9cb;
+  --accent: #9f7aea;
+  --accent-2: #7c3aed;
+  --good: #22c55e;
+  --bad: #ef4444;
+  --shadow: rgba(2, 6, 23, 0.45);
 }
 
 * {
   box-sizing: border-box;
 }
 
+html,
 body {
   margin: 0;
-  min-height: 100vh;
-  display: block;
+  width: 100%;
+  min-height: 100%;
+}
+
+body {
   font-family: "Source Sans 3", "Segoe UI", sans-serif;
-  background: linear-gradient(160deg, #e0f2fe 0%, var(--bg) 60%);
-  color: var(--ink);
+  background:
+    radial-gradient(1200px 500px at 10% -10%, rgba(124, 58, 237, 0.24), transparent 60%),
+    radial-gradient(900px 420px at 100% 0%, rgba(159, 122, 234, 0.14), transparent 60%),
+    linear-gradient(160deg, var(--bg0) 0%, var(--bg1) 45%, var(--bg2) 100%);
+  color: var(--text);
 }
 
 .layout {
-  width: min(94vw, 920px);
-  display: grid;
-  gap: 14px;
-  padding: 16px;
+  width: min(96vw, 1100px);
   margin: 0 auto;
+  display: grid;
+  gap: 12px;
+  padding: 12px;
 }
 
 .panel {
-  background: var(--card);
-  border: 1px solid #e2e8f0;
-  border-radius: 16px;
-  padding: 16px;
-  box-shadow: 0 12px 30px rgba(2, 6, 23, 0.07);
+  background: linear-gradient(180deg, rgba(31, 40, 60, 0.95), rgba(27, 35, 52, 0.95));
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 14px;
+  box-shadow: 0 10px 26px var(--shadow);
   overflow: hidden;
 }
 
 .topbar {
   display: flex;
   justify-content: space-between;
-  gap: 12px;
   align-items: flex-start;
+  gap: 10px;
 }
 
-.topbar h1 {
+.topbar-main h1 {
   margin: 0;
+  letter-spacing: 0.2px;
+}
+
+#status {
+  margin: 8px 0 0;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+
+h2,
+h3 {
+  margin: 0 0 8px;
 }
 
 .user-badge {
-  background: #dbeafe;
-  color: #1e3a8a;
-  border: 1px solid #93c5fd;
+  background: rgba(124, 58, 237, 0.2);
+  color: #ddd6fe;
+  border: 1px solid rgba(167, 139, 250, 0.45);
   border-radius: 999px;
   padding: 6px 12px;
   font-weight: 700;
@@ -62,7 +87,7 @@ body {
 
 .stack {
   display: grid;
-  gap: 14px;
+  gap: 12px;
 }
 
 form {
@@ -71,37 +96,58 @@ form {
   margin-top: 8px;
 }
 
+label {
+  color: var(--muted);
+}
+
 input {
-  padding: 10px;
-  border: 1px solid #94a3b8;
+  width: 100%;
+  border: 1px solid #3a4460;
   border-radius: 10px;
+  padding: 10px 12px;
   font-size: 1rem;
+  background: #121724;
+  color: var(--text);
 }
 
 button {
-  border: none;
+  border: 1px solid transparent;
   border-radius: 10px;
-  padding: 10px 14px;
-  background: var(--accent);
-  color: #fff;
+  padding: 10px 12px;
+  background: linear-gradient(180deg, var(--accent), var(--accent-2));
+  color: #f8f7ff;
   font-weight: 700;
   cursor: pointer;
 }
 
+button:hover {
+  filter: brightness(1.05);
+}
+
 button:disabled {
-  opacity: 0.6;
+  opacity: 0.55;
   cursor: not-allowed;
+}
+
+button.secondary {
+  background: #1c2538;
+  border-color: #3b4a67;
+  color: #d6def9;
 }
 
 .row-between {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  gap: 10px;
+  align-items: center;
+  gap: 8px;
 }
 
 .muted {
   color: var(--muted);
+}
+
+.tiny {
+  font-size: 0.85rem;
 }
 
 .progress-bars {
@@ -115,27 +161,155 @@ button:disabled {
 }
 
 .progress-label {
+  color: #c4d0ef;
   font-weight: 700;
 }
 
 .progress-track {
-  height: 18px;
-  background: #e2e8f0;
+  height: 12px;
   border-radius: 999px;
+  background: #111827;
+  border: 1px solid #303a52;
   overflow: hidden;
 }
 
 .progress-fill {
   height: 100%;
   min-width: 0;
-  background: linear-gradient(90deg, #16a34a, #059669);
-  color: #fff;
-  font-size: 0.75rem;
-  font-weight: 700;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #8b5cf6, #a78bfa);
+}
+
+.challenge-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 220px;
+  gap: 12px;
+  align-items: start;
+}
+
+.challenge-main {
+  min-width: 0;
+}
+
+#currentMeta,
+#currentBrief,
+#currentGuide li,
+.hint {
+  overflow-wrap: anywhere;
+}
+
+#currentGuide {
+  margin: 10px 0;
+  padding-left: 20px;
+  display: grid;
+  gap: 6px;
+}
+
+.copy-stack {
+  display: grid;
+  gap: 8px;
+  margin: 10px 0;
+}
+
+.copy-item {
+  width: 100%;
+  text-align: left;
+  background: #131a29;
+  border: 1px solid #364261;
+  color: #e2e8ff;
+  display: grid;
+  gap: 4px;
+}
+
+.copy-item code {
+  display: block;
+  font-family: "JetBrains Mono", "Fira Code", monospace;
+  font-size: 0.88rem;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.copy-label {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.hint {
+  background: rgba(124, 58, 237, 0.14);
+  border: 1px solid rgba(167, 139, 250, 0.42);
+  border-radius: 10px;
+  padding: 10px;
+}
+
+.solution {
+  margin-top: 12px;
+  border-top: 1px dashed #3a4666;
+  padding-top: 12px;
+}
+
+.solution pre {
+  margin: 8px 0 0;
+  background: #111725;
+  border: 1px solid #364261;
+  border-radius: 10px;
+  padding: 10px;
+  overflow: auto;
+}
+
+.solution code {
+  font-family: "JetBrains Mono", "Fira Code", monospace;
+  font-size: 0.85rem;
+  color: #dbe7ff;
+}
+
+.challenge-results {
+  background: #141a28;
+  border: 1px solid #313c56;
+  border-radius: 12px;
+  padding: 10px;
+  min-width: 0;
+}
+
+.results {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 8px;
+}
+
+.results li {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
-  padding-right: 8px;
+  min-height: 16px;
+}
+
+.result-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  display: inline-block;
+}
+
+.result-pass .result-dot {
+  background: var(--good);
+  box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.2);
+}
+
+.result-fail .result-dot {
+  background: var(--bad);
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2);
+}
+
+#challengeListDetails {
+  padding-top: 10px;
+}
+
+#challengeListDetails > summary {
+  cursor: pointer;
+  font-weight: 700;
+  color: #dbe2ff;
+  margin-bottom: 8px;
 }
 
 .challenge-list {
@@ -150,81 +324,64 @@ button:disabled {
   gap: 2px;
 }
 
-.challenge-name {
+.challenge-nav {
+  text-align: left;
+  background: #151d2c;
+  border: 1px solid #33415f;
+  color: #dce5ff;
   font-weight: 700;
-  overflow-wrap: anywhere;
+}
+
+.challenge-nav.is-selected {
+  border-color: #b794f4;
+  box-shadow: 0 0 0 1px rgba(183, 148, 244, 0.35) inset;
+}
+
+.challenge-nav:disabled {
+  opacity: 0.55;
 }
 
 .challenge-meta {
   color: var(--muted);
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   overflow-wrap: anywhere;
 }
 
-.status-completed .challenge-name {
-  color: var(--good);
+.status-completed .challenge-nav {
+  border-color: rgba(34, 197, 94, 0.5);
 }
 
-.status-current .challenge-name {
-  color: var(--warn);
-}
-
-.status-locked {
-  opacity: 0.75;
-}
-
-.hint {
-  background: #ffedd5;
-  border: 1px solid #fdba74;
-  border-radius: 10px;
-  padding: 10px;
-}
-
-.results {
-  margin: 10px 0 0 0;
-  padding-left: 18px;
-  display: grid;
-  gap: 6px;
-}
-
-.result-pass {
-  color: var(--good);
-}
-
-.result-fail {
-  color: #b91c1c;
+.status-current .challenge-nav {
+  border-color: rgba(167, 139, 250, 0.75);
 }
 
 .small {
   font-size: 0.95rem;
 }
 
-#status,
-#currentBrief,
-#currentMeta,
-.hint,
-.results li,
-#currentGuide li {
-  overflow-wrap: anywhere;
+@media (max-width: 900px) {
+  .challenge-split {
+    grid-template-columns: 1fr;
+  }
+
+  .challenge-results {
+    order: 2;
+  }
 }
 
 @media (max-width: 700px) {
   .layout {
     width: 100%;
-    padding: 10px;
-    gap: 10px;
+    padding: 8px;
+    gap: 8px;
   }
 
   .panel {
-    padding: 12px;
     border-radius: 12px;
+    padding: 12px;
   }
 
-  .topbar {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
+  .topbar,
   .row-between {
     flex-direction: column;
     align-items: stretch;
@@ -233,11 +390,5 @@ button:disabled {
   button,
   input {
     width: 100%;
-  }
-
-  .progress-fill {
-    justify-content: center;
-    padding-right: 0;
-    font-size: 0.7rem;
   }
 }

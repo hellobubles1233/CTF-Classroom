@@ -1,57 +1,77 @@
 <!doctype html>
-<html lang="en">
+<html lang="de">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>CTF Student Check-In</title>
+    <title>CTF Lernmodus</title>
     <link rel="stylesheet" href="/styles.css" />
   </head>
   <body>
     <main class="layout">
       <header class="topbar panel">
-        <div>
-          <h1>CTF Check-In</h1>
-          <p id="status">Loading session status...</p>
+        <div class="topbar-main">
+          <h1>CTF Lernmodus</h1>
+          <p id="status">Lade Sitzungsstatus...</p>
         </div>
-        <div id="userBadge" class="user-badge">Not signed in</div>
+        <div id="userBadge" class="user-badge">Nicht angemeldet</div>
       </header>
 
       <section class="panel" id="signupPanel">
-        <h2>Join / Rejoin</h2>
+        <h2>Anmelden / Wiederverbinden</h2>
         <form id="signupForm">
-          <label for="name">Display name</label>
+          <label for="name">Anzeigename</label>
           <input id="name" name="name" required minlength="2" maxlength="40" />
-          <button type="submit">Join / Rejoin</button>
+          <button type="submit">Anmelden</button>
         </form>
       </section>
 
       <section id="challengeArea" class="stack" hidden>
         <section class="panel">
-          <h2>Category Progress</h2>
+          <h2>Fortschritt nach Bereich</h2>
           <div id="progressBars" class="progress-bars"></div>
         </section>
 
         <section class="panel">
           <div class="row-between">
-            <h2 id="currentTitle">Current Challenge</h2>
-            <button id="manualCheckBtn" type="button">Manual Check</button>
+            <h2 id="currentTitle">Aktuelle Challenge</h2>
+            <button id="manualCheckBtn" type="button">Manuell prüfen</button>
           </div>
-          <p id="currentMeta" class="muted"></p>
-          <p id="currentBrief"></p>
-          <ol id="currentGuide"></ol>
-          <p id="currentHint" class="hint"></p>
-          <ul id="currentResults" class="results"></ul>
+
+          <div class="challenge-split">
+            <div class="challenge-main">
+              <p id="currentMeta" class="muted"></p>
+              <p id="currentBrief"></p>
+              <ol id="currentGuide"></ol>
+              <div id="currentCommands" class="copy-stack"></div>
+              <p id="currentHint" class="hint"></p>
+
+              <section id="markdownSolutionSection" class="solution" hidden>
+                <h3>Musterlösung</h3>
+                <p id="markdownCooldownText" class="muted"></p>
+                <div id="markdownSolutionWrap" hidden>
+                  <button id="copySolutionBtn" type="button" class="secondary">Lösung kopieren</button>
+                  <pre><code id="markdownSolutionCode"></code></pre>
+                </div>
+              </section>
+            </div>
+
+            <aside class="challenge-results">
+              <h3>Prüfergebnisse</h3>
+              <ul id="currentResults" class="results"></ul>
+              <p class="muted tiny">Fahre mit der Maus über einen Punkt für die volle Meldung.</p>
+            </aside>
+          </div>
         </section>
 
-        <section class="panel">
-          <h2>Challenge List</h2>
+        <details id="challengeListDetails" class="panel" open>
+          <summary>Challenge-Liste</summary>
           <ol id="challengeList" class="challenge-list"></ol>
-        </section>
+        </details>
       </section>
 
-      <section class="panel small">
-        <h2>How this works</h2>
-        <p>Use the same display name to rejoin and resume challenge progress.</p>
+      <section class="panel small" id="howItWorksSection">
+        <h2>So funktioniert es</h2>
+        <p>Nutze denselben Anzeigenamen, um dich nach einem Neustart wieder zu verbinden.</p>
       </section>
     </main>
 
