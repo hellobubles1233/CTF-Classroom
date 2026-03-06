@@ -1,5 +1,6 @@
 const statusEl = document.getElementById('status');
 const userBadgeEl = document.getElementById('userBadge');
+const signupPanelEl = document.getElementById('signupPanel');
 const signupFormEl = document.getElementById('signupForm');
 const nameInputEl = document.getElementById('name');
 const challengeAreaEl = document.getElementById('challengeArea');
@@ -18,6 +19,10 @@ let pollTimer = null;
 
 function setStatus(text) {
   statusEl.textContent = text;
+}
+
+function setSignedInUI(session) {
+  signupPanelEl.hidden = Boolean(session && session.name);
 }
 
 function setUserBadge(session) {
@@ -166,6 +171,7 @@ async function refreshChallengeState(manual) {
 
   if (res.status === 401) {
     challengeAreaEl.hidden = true;
+    setSignedInUI(null);
     stopPolling();
     return;
   }
@@ -177,6 +183,7 @@ async function refreshChallengeState(manual) {
   }
 
   setUserBadge(data.session);
+  setSignedInUI(data.session);
   renderChallengeState(data);
 }
 
@@ -185,6 +192,7 @@ async function loadStatus() {
   const data = await res.json();
 
   setUserBadge(data.session);
+  setSignedInUI(data.session);
 
   if (data.session) {
     if (data.session.offline || !data.session.studentId) {
@@ -199,6 +207,7 @@ async function loadStatus() {
     startPolling();
   } else {
     challengeAreaEl.hidden = true;
+    setSignedInUI(null);
     setStatus('Not signed in yet. Enter your name to join.');
   }
 }
@@ -216,11 +225,13 @@ signupFormEl.addEventListener('submit', async (event) => {
   const data = await res.json();
 
   if (!res.ok && !data.session) {
+    setSignedInUI(null);
     setStatus(`Error: ${data.error || 'Signup failed'}`);
     return;
   }
 
   setUserBadge(data.session);
+  setSignedInUI(data.session);
 
   if (data.offline || (data.session && !data.session.studentId)) {
     const details = data.error ? ` Details: ${data.error}` : '';

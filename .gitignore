@@ -1,3 +1,5 @@
 node_modules/
 .ctf/runtime/*
 !.ctf/runtime/.gitkeep
+
+.env.local

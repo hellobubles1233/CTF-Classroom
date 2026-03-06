@@ -15,8 +15,7 @@
 body {
   margin: 0;
   min-height: 100vh;
-  display: grid;
-  place-items: center;
+  display: block;
   font-family: "Source Sans 3", "Segoe UI", sans-serif;
   background: linear-gradient(160deg, #e0f2fe 0%, var(--bg) 60%);
   color: var(--ink);
@@ -27,6 +26,7 @@ body {
   display: grid;
   gap: 14px;
   padding: 16px;
+  margin: 0 auto;
 }
 
 .panel {
@@ -35,6 +35,7 @@ body {
   border-radius: 16px;
   padding: 16px;
   box-shadow: 0 12px 30px rgba(2, 6, 23, 0.07);
+  overflow: hidden;
 }
 
 .topbar {
@@ -55,7 +56,8 @@ body {
   border-radius: 999px;
   padding: 6px 12px;
   font-weight: 700;
-  white-space: nowrap;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 .stack {
@@ -150,11 +152,13 @@ button:disabled {
 
 .challenge-name {
   font-weight: 700;
+  overflow-wrap: anywhere;
 }
 
 .challenge-meta {
   color: var(--muted);
   font-size: 0.9rem;
+  overflow-wrap: anywhere;
 }
 
 .status-completed .challenge-name {
@@ -195,7 +199,27 @@ button:disabled {
   font-size: 0.95rem;
 }
 
+#status,
+#currentBrief,
+#currentMeta,
+.hint,
+.results li,
+#currentGuide li {
+  overflow-wrap: anywhere;
+}
+
 @media (max-width: 700px) {
+  .layout {
+    width: 100%;
+    padding: 10px;
+    gap: 10px;
+  }
+
+  .panel {
+    padding: 12px;
+    border-radius: 12px;
+  }
+
   .topbar {
     flex-direction: column;
     align-items: stretch;
@@ -204,5 +228,16 @@ button:disabled {
   .row-between {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  button,
+  input {
+    width: 100%;
+  }
+
+  .progress-fill {
+    justify-content: center;
+    padding-right: 0;
+    font-size: 0.7rem;
   }
 }
